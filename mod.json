@@ -1,0 +1,64 @@
+{
+	"geode": "4.4.0",
+	"gd": {
+		"win": "2.2074",
+		"mac": "2.2074",
+		"ios": "2.2074",
+		"android": "2.2074"
+	},
+	"id": "raydeeux_hjfod.fodsmenuanimations",
+	"name": "HJfod's Menu Animations Reborn",
+	"version": "v1.0.0",
+	"developer": "RayDeeUx",
+	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
+	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",
+	"settings": {
+		"enabled": {
+			"name": "Enabled",
+			"description": "Toggles the mod.",
+			"type": "bool",
+			"default": true
+		},
+		"classic-play-button-anim": {
+			"name": "Classic Play Button Animation",
+			"description": "Use the original animation for the Play button (that big button at dead center of the screen).",
+			"type": "bool",
+			"default": false
+		},
+		"reverse-side-menus": {
+			"name": "Reverse Side Menu Animation Order",
+			"description": "Switches from the default \"bottom to top\" animation order to \"top to bottom\" animation order.",
+			"type": "bool",
+			"default": false
+		},
+		"close-menu-delay": {
+			"name": "Close Menu Delay",
+			"description": "Adjust the delay for the close menu.\n\n<cy>For closing the game more gracefully without having to wait for the animation to finish.</c>",
+			"type": "float",
+			"default": {
+				"win": 2.5,
+				"mac": 2.5,
+				"ios": 0.0,
+				"android": 0.0
+			},
+			"min": 0.0,
+			"max": 2.5,
+			"control": {
+				"slider": true,
+				"input": true,
+				"arrows": true,
+				"big-arrows": true,
+				"arrow-step": 0.1,
+				"big-arrow-step": 1
+			}
+		}
+	},
+	"issues": {
+		"url": "https://discord.com/channels/911701438269386882/1205523212444639292",
+		"info": "Ping me <cl>(@erymanthus)</c> in the Geode SDK Discord server's <cl>#help</c> channel if you need help. <cr>DMs are NOT accepted.</c>"
+	},
+	"links": {
+		"community": "https://discord.gg/WqZBYdBWZW",
+		"homepage": "https://discord.com/channels/822510988409831486/1206371881222144020"
+	}
+}
