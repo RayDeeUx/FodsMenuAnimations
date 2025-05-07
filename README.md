@@ -1,5 +1,5 @@
 # HJfod's Menu Animations Reborn
-HJfod's menu animations mod from the old days of GD 2.1 (remember ModLdr, Mega Hack v6 extensions, GDHM, or Italian Apk Downloader's mod menu?), ported to Geode v5 (with permission)!
+HJfod's menu animations mod from the old days of GD 2.1 (remember ModLdr, Mega Hack v6 extensions, GDHM, or Italian Apk Downloader's mod menu?), ported to Geode (with permission)!
 
 For a recap of what this mod does in HJfod's own words:
 
