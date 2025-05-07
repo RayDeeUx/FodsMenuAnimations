@@ -2,17 +2,24 @@
 
 using namespace geode::prelude;
 
-#define GET_MOD Loader::get()->getLoadedMod
+#define REDASH_ID "ninxout.redash"
 #define YAMM_ID "raydeeux.yetanotherqolmod"
+#define VANILLA_PAGES_ID "alphalaneous.vanilla_pages"
+#define GET_MOD Loader::get()->getLoadedMod
 #define YAMM Loader::get()->isModLoaded(YAMM_ID)
+#define REDASH Loader::get()->isModLoaded(REDASH_ID)
+#define VANILLA_PAGES_LOADED Loader::get()->isModLoaded(VANILLA_PAGES_ID)
+#define VANILLA_PAGES GET_MOD(VANILLA_PAGES_ID)
+#define VANILLA_PAGES_MENULAYER_RIGHT GET_MOD(VANILLA_PAGES_ID)->getSettingValue<bool>("menulayer-right-menu")
+#define VANILLA_PAGES_MENULAYER_BOTTOM GET_MOD(VANILLA_PAGES_ID)->getSettingValue<bool>("menulayer-bottom-menu")
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
-		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", "raydeeux.yetanotherqolmod");
-		else if (Loader::get()->isModLoaded("ninxout.redash")) (void) self.setHookPriorityAfterPost("MenuLayer::init", "ninxout.redash");
-		else if (const geode::Mod* vanillaPages = GET_MOD("alphalaneous.vanilla_pages"); vanillaPages && (vanillaPages->getSettingValue<bool>("menulayer-right-menu") || vanillaPages->getSettingValue<bool>("menulayer-bottom-menu"))) (void) self.setHookPriorityAfterPost("MenuLayer::init", "alphalaneous.vanilla_pages");
+		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", YAMM_ID);
+		else if (REDASH) (void) self.setHookPriorityAfterPost("MenuLayer::init", REDASH_ID);
+		else if (const geode::Mod* vanillaPages = VANILLA_PAGES; vanillaPages && (VANILLA_PAGES_MENULAYER_RIGHT || VANILLA_PAGES_MENULAYER_BOTTOM)) (void) self.setHookPriorityAfterPost("MenuLayer::init", VANILLA_PAGES_ID);
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
 	}
 	bool init() {
@@ -101,7 +108,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 
-		for (CCNode* node : CCArrayExt<CCNode*>(bottomMenu->getChildren())) {
+		CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;
+		auto tMTSFZChildren = theMenuToScaleFromZero->getChildren();
+		if (REDASH && tMTSFZChildren) tMTSFZChildren->reverseObjects();
+		for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
+			if (theMenuToScaleFromZero == rightSideMenu && VANILLA_PAGES_MENULAYER_BOTTOM) break;
 			if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
 			const float nodeOriginalScale = node->getScale();
 			CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
@@ -114,11 +125,18 @@ class $modify(MyMenuLayer, MenuLayer) {
 			node->setScale(0.f);
 			node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
 			node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
-
 			i++;
 		}
+		if (theMenuToScaleFromZero == rightSideMenu && VANILLA_PAGES_MENULAYER_BOTTOM) {
+			const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
+			CCDelayTime* delay = CCDelayTime::create(1.f);
+			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
 
-		if (CCNode* alphaBottomNav = this->getChildByID("bottom-menu-navigation-menu")) {
+			theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
+			theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
+		}
+
+		if (CCNode* alphaBottomNav = this->getChildByID("bottom-menu-navigation-menu"); alphaBottomNav && !REDASH) {
 			for (CCNode* node : CCArrayExt<CCNode*>(alphaBottomNav->getChildren())) {
 				const float nodeOrigYPos = node->getPositionY();
 
@@ -161,9 +179,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		auto rightSideMenuChildren = rightSideMenu->getChildren();
+		CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu;
+		auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren();
 		if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && rightSideMenuChildren) rightSideMenuChildren->reverseObjects();
 		for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
+			if (theMenuToSlideFromRight == bottomMenu && VANILLA_PAGES_MENULAYER_BOTTOM) break;
 			if (!node->isVisible()) continue;
 			const float nodeOrigXPos = node->getPositionX();
 
@@ -174,6 +194,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
 			i++;
+		}
+		if (theMenuToSlideFromRight == bottomMenu && VANILLA_PAGES_MENULAYER_BOTTOM) {
+			const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
+			CCDelayTime* delay = CCDelayTime::create(1.f);
+			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
+
+			theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
+			theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
 		}
 
 		if (CCNode* alphaRightNav = this->getChildByID("right-side-menu-navigation-menu")) {
@@ -245,7 +273,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 			i++;
 		}
 		i = 0;
-
 
 		return true;
 	}
