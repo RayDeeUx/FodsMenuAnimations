@@ -33,7 +33,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
 		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", YAMM_ID);
 		else if (REDASH) (void) self.setHookPriorityAfterPost("MenuLayer::init", REDASH_ID);
-		else if (const geode::Mod* vanillaPages = VANILLA_PAGES; vanillaPages && (VANILLA_PAGES_MENULAYER_RIGHT || VANILLA_PAGES_MENULAYER_BOTTOM)) (void) self.setHookPriorityAfterPost("MenuLayer::init", VANILLA_PAGES_ID);
+		else if (VANILLA_PAGES_LOADED) (void) self.setHookPriorityAfterPost("MenuLayer::init", VANILLA_PAGES_ID);
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
 	}
 	bool init() {
