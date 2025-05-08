@@ -116,8 +116,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 			title->runAction(titleSequence);
 		}
 
-		if (!IS_AFFECTED_BY_YAMM(playerUsername)) {
-			for (CCNode* sprite : CCArrayExt<CCNode*>(playerUsername->getChildren())) {
+		if (const auto playerChildren = playerUsername->getChildren()) {
+			for (CCNode* sprite : CCArrayExt<CCNode*>(playerChildren)) {
 				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(sprite->getTag())) + .5f);
 				CCEaseElasticOut* eeoScale = CCEaseElasticOut::create(CCScaleTo::create(1.f, 1.f));
 				CCSequence* usernameCharSequence = CCSequence::create(delay, eeoScale, nullptr);
