@@ -50,30 +50,32 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 
 		int i = 0;
-		for (CCNode* node : CCArrayExt<CCNode*>(mainMenu->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			node->setScale(0.f);
-			node->setRotation(node->getID() == "play-button" ? -90.f : 90.f);
+		if (const auto mainMenuChildren = mainMenu->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(mainMenuChildren)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				node->setScale(0.f);
+				node->setRotation(node->getID() == "play-button" ? -90.f : 90.f);
 
-			if (node->getID() == "play-button") {
-				CCDelayTime* playButtonDelay = CCDelayTime::create(.75f);
-				CCFiniteTimeAction* eoScale = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(1.25f, 1.f), 4.f));
-				CCFiniteTimeAction* eoRotate = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(1.25f, 0.f), 4.f));
-				CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eoScale, eoRotate, nullptr);
-				CCSequence* scaleAndRotateSequencePlayButton = CCSequence::create(playButtonDelay, whyDidFodUseCCSpawnAgain, nullptr);
+				if (node->getID() == "play-button") {
+					CCDelayTime* playButtonDelay = CCDelayTime::create(.75f);
+					CCFiniteTimeAction* eoScale = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(1.25f, 1.f), 4.f));
+					CCFiniteTimeAction* eoRotate = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(1.25f, 0.f), 4.f));
+					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eoScale, eoRotate, nullptr);
+					CCSequence* scaleAndRotateSequencePlayButton = CCSequence::create(playButtonDelay, whyDidFodUseCCSpawnAgain, nullptr);
 
-				node->runAction(scaleAndRotateSequencePlayButton);
-			} else {
-				CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
-				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
-				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
-				CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
-				CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
+					node->runAction(scaleAndRotateSequencePlayButton);
+				} else {
+					CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
+					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
+					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
+					CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
+					CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
-				node->runAction(scaleAndRotateSequence);
+					node->runAction(scaleAndRotateSequence);
+				}
+
+				i++;
 			}
-
-			i++;
 		}
 		i = 0; // reset incrementer
 
@@ -96,7 +98,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 
-		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround) {
+		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
 				const float origYPos = node->getPositionY();
 
@@ -109,97 +111,107 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;
-		auto tMTSFZChildren = theMenuToScaleFromZero->getChildren();
-		if (REDASH && tMTSFZChildren) tMTSFZChildren->reverseObjects();
-		for (!VANILLA_PAGES_MENULAYER_BOTTOM; CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
-			if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
-			const float nodeOriginalScale = node->getScale();
-			CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
-			CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
+		if (theMenuToScaleFromZero) {
+			auto tMTSFZChildren = theMenuToScaleFromZero->getChildren();
+			if (REDASH && tMTSFZChildren) tMTSFZChildren->reverseObjects();
+			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
+				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
+				CCDelayTime* delay = CCDelayTime::create(1.f);
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
 
-			CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-			CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.25f)), 4.f);
-			CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
+				theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
+				theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
+			} else if (tMTSFZChildren) {
+				for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
+					if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
+					const float nodeOriginalScale = node->getScale();
+					CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
+					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
+	
+					CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+					CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.25f)), 4.f);
+					CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
+	
+					node->setScale(0.f);
+					node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
+					node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
+					i++;
+				}
+			}
 
-			node->setScale(0.f);
-			node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
-			node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
-			i++;
-		}
-		if (VANILLA_PAGES_MENULAYER_BOTTOM) {
-			const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
-			CCDelayTime* delay = CCDelayTime::create(1.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
+			if (CCNode* alphaBottomNav = this->getChildByID("bottom-menu-navigation-menu"); alphaBottomNav && !REDASH) {
+				for (CCNode* node : CCArrayExt<CCNode*>(alphaBottomNav->getChildren())) {
+					const float nodeOrigYPos = node->getPositionY();
 
-			theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
-			theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
-		}
+					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(bottomMenu->getChildrenCount()) * .25f) + 2.f);
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
 
-		if (CCNode* alphaBottomNav = this->getChildByID("bottom-menu-navigation-menu"); alphaBottomNav && !REDASH) {
-			for (CCNode* node : CCArrayExt<CCNode*>(alphaBottomNav->getChildren())) {
-				const float nodeOrigYPos = node->getPositionY();
-
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(bottomMenu->getChildrenCount()) * .25f) + 2.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
-
-				node->setPositionY(nodeOrigYPos - 75.f);
-				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+					node->setPositionY(nodeOrigYPos - 75.f);
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				}
 			}
 		}
 		i = 0;
 
 		auto sideMenuChildren = sideMenu->getChildren();
-		if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && sideMenuChildren) sideMenuChildren->reverseObjects();
-		for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
-			if (!node->isVisible()) continue;
-			const float nodeOrigXPos = node->getPositionX();
+		if (sideMenuChildren) {
+			if (Mod::get()->getSettingValue<bool>("reverse-side-menus")) sideMenuChildren->reverseObjects();
+			for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
+				if (!node->isVisible()) continue;
+				const float nodeOrigXPos = node->getPositionX();
 
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 100.f, 0.f }));
+				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 100.f, 0.f }));
 
-			node->setPositionX(nodeOrigXPos - 100.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				node->setPositionX(nodeOrigXPos - 100.f);
+				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
-		for (CCNode* node : CCArrayExt<CCNode*>(topRightMenu->getChildren())) {
-			if (!node->isVisible()) continue;
-			const float nodeOrigXPos = node->getPositionY();
+		if (const auto topRightChildren = topRightMenu->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(topRightChildren)) {
+				if (!node->isVisible()) continue;
+				const float nodeOrigXPos = node->getPositionY();
 
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -100.f }));
+				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -100.f }));
 
-			node->setPositionY(nodeOrigXPos + 100.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				node->setPositionY(nodeOrigXPos + 100.f);
+				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
 		CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu;
-		auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren();
-		if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && rightSideMenuChildren) rightSideMenuChildren->reverseObjects();
-		for (!VANILLA_PAGES_MENULAYER_BOTTOM; CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
-			if (!node->isVisible()) continue;
-			const float nodeOrigXPos = node->getPositionX();
+		if (theMenuToSlideFromRight) {
+			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
+				const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
+				CCDelayTime* delay = CCDelayTime::create(1.f);
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
 
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
-
-			node->setPositionX(nodeOrigXPos + 100.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-
-			i++;
-		}
-		if (VANILLA_PAGES_MENULAYER_BOTTOM) {
-			const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
-			CCDelayTime* delay = CCDelayTime::create(1.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
-
-			theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
-			theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
+				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
+			} else {
+				auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren();
+				if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && rightSideMenuChildren) rightSideMenuChildren->reverseObjects();
+				for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
+					if (!node->isVisible()) continue;
+					const float nodeOrigXPos = node->getPositionX();
+	
+					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
+	
+					node->setPositionX(nodeOrigXPos + 100.f);
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+	
+					i++;
+				}
+			}
 		}
 
 		if (CCNode* alphaRightNav = this->getChildByID("right-side-menu-navigation-menu")) {
@@ -215,60 +227,70 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		for (CCNode* node : CCArrayExt<CCNode*>(socialMediaMenu->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + 1.5f);
-			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-			CCSequence* sequence = CCSequence::create(delay, eboScale, nullptr);
+		if (const auto socialMediaChildren = socialMediaMenu->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(socialMediaChildren)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + 1.5f);
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
+				CCSequence* sequence = CCSequence::create(delay, eboScale, nullptr);
 
-			node->setScale(0.f);
-			node->runAction(sequence);
-			i++;
+				node->setScale(0.f);
+				node->runAction(sequence);
+				i++;
+			}
 		}
 		i = 0;
 
-		for (closeMenu; CCNode* node : CCArrayExt<CCNode*>(closeMenu->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")));
-			CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.25f, 1.f));
-			CCSequence* sequence = CCSequence::create(delay, eeoScale, nullptr);
-
-			node->setScale(0.f);
-			node->runAction(sequence);
-
-			i++;
+		if (closeMenu) {
+			if (const auto closeChildren = closeMenu->getChildren()) {
+				for (CCNode* node : CCArrayExt<CCNode*>(closeChildren)) {
+					if (IS_AFFECTED_BY_YAMM(node)) continue;
+					CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")));
+					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.25f, 1.f));
+					CCSequence* sequence = CCSequence::create(delay, eeoScale, nullptr);
+		
+					node->setScale(0.f);
+					node->runAction(sequence);
+		
+					i++;
+				}
+			}
 		}
 		i = 0;
 
-		for (CCNode* node : CCArrayExt<CCNode*>(moreGamesMenu->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + 2.f);
-			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-			CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
-			CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
-			CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
+		if (const auto mgChildren = moreGamesMenu->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(mgChildren)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + 2.f);
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+				CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
+				CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
-			node->setScale(0.f);
-			node->setRotation(90.f);
-			node->runAction(sequence);
+				node->setScale(0.f);
+				node->setRotation(90.f);
+				node->runAction(sequence);
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
-		for (CCNode* node : CCArrayExt<CCNode*>(profileMenu->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + .5f);
-			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-			CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
-			CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
-			CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
+		if (const auto profileChildren = profileMenu->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(profileChildren)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + .5f);
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+				CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
+				CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
 
-			node->setScale(0.f);
-			node->setRotation(-90.f);
-			node->runAction(sequence);
+				node->setScale(0.f);
+				node->setRotation(-90.f);
+				node->runAction(sequence);
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
@@ -284,107 +306,119 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		if (!redashMain || !redashDailies || !redashStats || !redashBottom || !redashTop) return true;
 
-		for (redashMain->getChildren(); CCNode* node : CCArrayExt<CCNode*>(redashMain->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
-			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
-			CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
-			CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
-			CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
+		if (const auto ommMain = redashMain->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(ommMain)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
+				CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
+				CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
-			node->setScale(0.f);
-			node->setRotation(i % 2 == 0 ? -90.f : 90.f);
-			node->runAction(scaleAndRotateSequence);
+				node->setScale(0.f);
+				node->setRotation(i % 2 == 0 ? -90.f : 90.f);
+				node->runAction(scaleAndRotateSequence);
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
-		for (redashDailies->getChildren(); CCNode* node : CCArrayExt<CCNode*>(redashDailies->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			const float nodeOriginalScale = node->getScale();
-			CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
-			CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
+		if (const auto ommDailies = redashDailies->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(ommDailies)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				const float nodeOriginalScale = node->getScale();
+				CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
+				CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
 
-			CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-			CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.1f)), 4.f);
-			CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
+				CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+				CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.1f)), 4.f);
+				CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
 
-			node->setScale(0.f);
-			node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
-			node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
+				node->setScale(0.f);
+				node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
+				node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
 
-			i++;
+				i++;
+			}
 		}
 		i = 0;
 
-		for (redashStats->getChildren(); CCNode* node : CCArrayExt<CCNode*>(redashStats->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			const float nodeOrigYPos = node->getPositionY();
-
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .375f) + 1.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -75.f }));
-
-			node->setPositionY(nodeOrigYPos + 75.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-
-			i++;
-		}
-		i = 0;
-
-		for (redashBottom->getChildren(); CCNode* node : CCArrayExt<CCNode*>(redashBottom->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			const float nodeOrigYPos = node->getPositionY();
-
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f) + 1.f);
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
-
-			node->setPositionY(nodeOrigYPos - 75.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-
-			i++;
-		}
-		i = 0;
-
-		for (redashHide->getChildren(); CCNode* node : CCArrayExt<CCNode*>(redashHide->getChildren())) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			const float nodeOrigYPos = node->getPositionY();
-
-			CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f));
-			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
-
-			node->setPositionY(nodeOrigYPos - 75.f);
-			node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-
-			i++;
-		}
-		i = 0;
-
-		auto redashTopChildren = redashTop->getChildren();
-		if (redashTopChildren) redashTopChildren->reverseObjects();
-		for (CCNode* node : CCArrayExt<CCNode*>(redashTopChildren)) {
-			if (IS_AFFECTED_BY_YAMM(node)) continue;
-			if (node->getID() == "garage-rope") {
+		if (const auto ommStats = redashStats->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(ommStats)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .375f) + 1.f);
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -75.f }));
 
 				node->setPositionY(nodeOrigYPos + 75.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-			} else {
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
-				CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
-				CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
 
-				node->setScale(0.f);
-				node->setRotation(-90.f);
-				node->runAction(sequence);
+				i++;
 			}
+		}
+		i = 0;
 
-			i++;
+		if (const auto ommButtom = redashBottom->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(ommButtom)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				const float nodeOrigYPos = node->getPositionY();
+
+				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f) + 1.f);
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
+
+				node->setPositionY(nodeOrigYPos - 75.f);
+				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+
+				i++;
+			}
+		}
+		i = 0;
+
+		if (const auto ommHide = redashHide->getChildren()) {
+			for (CCNode* node : CCArrayExt<CCNode*>(ommHide)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				const float nodeOrigYPos = node->getPositionY();
+
+				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
+
+				node->setPositionY(nodeOrigYPos - 75.f);
+				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+
+				i++;
+			}
+		}
+		i = 0;
+
+		auto ommTop = redashTop->getChildren();
+		if (ommTop) {
+			ommTop->reverseObjects();
+			for (CCNode* node : CCArrayExt<CCNode*>(ommTop)) {
+				if (IS_AFFECTED_BY_YAMM(node)) continue;
+				if (node->getID() == "garage-rope") {
+					const float nodeOrigYPos = node->getPositionY();
+
+					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -75.f }));
+
+					node->setPositionY(nodeOrigYPos + 75.f);
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				} else {
+					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
+					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
+					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
+					CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
+
+					node->setScale(0.f);
+					node->setRotation(-90.f);
+					node->runAction(sequence);
+				}
+
+				i++;
+			}
 		}
 		i = 0;
 
