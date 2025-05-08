@@ -5,10 +5,10 @@
 // but what's done is done, and we can only move forward.
 // --raydeeux
 
-// if you know of a better way to port traditional mod
-// source code over to geode *AND* adapt it to today's
-// geode index, i'm all ears. have at it, and use fod's
-// source code as a reference:
+// if you know of a better way to port traditional GD mod
+// source code over to geode *AND* adapt it to today's mods
+// on the geode index, i'm all ears. have at it, go some fun,
+// and please have a browser tab open fod's source code for reference:
 // https://raw.githubusercontent.com/HJfod/cool-menu-animation/v1.1/main.cpp
 // --raydeeux
 
@@ -46,6 +46,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		// his rule just this once for reasons you'll see shortly.
 		// (spoiler: cocos2d nullptr checks are really finicky)
 		// please forgive me for my flagrant transgression.
+		// --raydeeux
 		if (!MenuLayer::init()) return false;
 
 		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
