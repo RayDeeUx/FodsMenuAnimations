@@ -38,7 +38,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* playerUsername = this->getChildByID("player-username");
 		CCNode* closeMenu = this->getChildByID("close-menu");
 
-		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername || !closeMenu) return true;
+		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return true;
 
 		std::string nodeChosenByYAMM = "this-mod-doesnt-assign-node-ids-to-anything-lmfao"_spr;
 		if (geode::Mod* yamm = GET_YAMM; yamm && YAMM) {
@@ -111,8 +111,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;
 		auto tMTSFZChildren = theMenuToScaleFromZero->getChildren();
 		if (REDASH && tMTSFZChildren) tMTSFZChildren->reverseObjects();
-		for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
-			if (theMenuToScaleFromZero == rightSideMenu && VANILLA_PAGES_MENULAYER_BOTTOM) break;
+		for (!VANILLA_PAGES_MENULAYER_BOTTOM; CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
 			if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
 			const float nodeOriginalScale = node->getScale();
 			CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
@@ -127,7 +126,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
 			i++;
 		}
-		if (theMenuToScaleFromZero == rightSideMenu && VANILLA_PAGES_MENULAYER_BOTTOM) {
+		if (VANILLA_PAGES_MENULAYER_BOTTOM) {
 			const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 			CCDelayTime* delay = CCDelayTime::create(1.f);
 			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
@@ -182,8 +181,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu;
 		auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren();
 		if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && rightSideMenuChildren) rightSideMenuChildren->reverseObjects();
-		for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
-			if (theMenuToSlideFromRight == bottomMenu && VANILLA_PAGES_MENULAYER_BOTTOM) break;
+		for (!VANILLA_PAGES_MENULAYER_BOTTOM; CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
 			if (!node->isVisible()) continue;
 			const float nodeOrigXPos = node->getPositionX();
 
@@ -195,7 +193,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 			i++;
 		}
-		if (theMenuToSlideFromRight == bottomMenu && VANILLA_PAGES_MENULAYER_BOTTOM) {
+		if (VANILLA_PAGES_MENULAYER_BOTTOM) {
 			const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
 			CCDelayTime* delay = CCDelayTime::create(1.f);
 			CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
@@ -229,7 +227,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		for (CCNode* node : CCArrayExt<CCNode*>(closeMenu->getChildren())) {
+		for (closeMenu; CCNode* node : CCArrayExt<CCNode*>(closeMenu->getChildren())) {
 			if (IS_AFFECTED_BY_YAMM(node)) continue;
 			CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")));
 			CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.25f, 1.f));
