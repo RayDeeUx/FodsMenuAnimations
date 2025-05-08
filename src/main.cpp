@@ -139,7 +139,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
-			if (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu) {
+			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu)) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
@@ -213,7 +213,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		i = 0;
 
 		if (CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu) {
-			if (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu) {
+			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu)) {
 				const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
