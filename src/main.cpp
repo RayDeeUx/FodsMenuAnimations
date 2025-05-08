@@ -1,3 +1,10 @@
+// welcome to what is probably my worst C++ code yet.
+// the truth is, i realized that the code quality would
+// surely tank once i realized i couldn't take advantage
+// of early return statements in a func hook like this.
+// but what's done is done, and we can only move forward.
+// --raydeeux
+
 #include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
@@ -36,7 +43,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* socialMediaMenu = this->getChildByID("social-media-menu");
 		CCNode* moreGamesMenu = this->getChildByID("more-games-menu");
 		CCNode* playerUsername = this->getChildByID("player-username");
-		CCNode* closeMenu = this->getChildByID("close-menu");
 
 		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return true;
 
@@ -110,10 +116,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 
-		CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;
-		if (theMenuToScaleFromZero) {
-			auto tMTSFZChildren = theMenuToScaleFromZero->getChildren();
-			if (REDASH && tMTSFZChildren) tMTSFZChildren->reverseObjects();
+		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;) {
 			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
@@ -121,7 +124,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
 				theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
-			} else if (tMTSFZChildren) {
+			} else if (auto tMTSFZChildren = theMenuToScaleFromZero->getChildren()) {
+				if (REDASH) tMTSFZChildren->reverseObjects();
 				for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
 					if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
 					const float nodeOriginalScale = node->getScale();
@@ -153,8 +157,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		auto sideMenuChildren = sideMenu->getChildren();
-		if (sideMenuChildren) {
+		if (auto sideMenuChildren = sideMenu->getChildren()) {
 			if (Mod::get()->getSettingValue<bool>("reverse-side-menus")) sideMenuChildren->reverseObjects();
 			for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
 				if (!node->isVisible()) continue;
@@ -196,9 +199,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
 				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
-			} else {
-				auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren();
-				if (Mod::get()->getSettingValue<bool>("reverse-side-menus") && rightSideMenuChildren) rightSideMenuChildren->reverseObjects();
+			} else if (auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren()) {
+				if (Mod::get()->getSettingValue<bool>("reverse-side-menus")) rightSideMenuChildren->reverseObjects();
 				for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
 					if (!node->isVisible()) continue;
 					const float nodeOrigXPos = node->getPositionX();
@@ -241,7 +243,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		if (closeMenu) {
+		if (CCNode* closeMenu = this->getChildByID("close-menu")) {
 			if (const auto closeChildren = closeMenu->getChildren()) {
 				for (CCNode* node : CCArrayExt<CCNode*>(closeChildren)) {
 					if (IS_AFFECTED_BY_YAMM(node)) continue;
@@ -392,8 +394,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		auto ommTop = redashTop->getChildren();
-		if (ommTop) {
+		if (auto ommTop = redashTop->getChildren()) {
 			ommTop->reverseObjects();
 			for (CCNode* node : CCArrayExt<CCNode*>(ommTop)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
