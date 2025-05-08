@@ -137,7 +137,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 
-		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu;) {
+		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
 			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
