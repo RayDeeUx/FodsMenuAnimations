@@ -444,6 +444,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
+		if (CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg")) {
+			redashBG->setOpacity(0);
+			redashBG->runAction(CCFadeIn::create(.25f));
+		}
+
 		return true;
 	}
 };
