@@ -444,9 +444,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		if (CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg")) {
+		if (CCScale9Sprite* redashBG = typeinfo_cast<CCScale9Sprite*>(this->getChildByID("ninxout.redash/bottom-menu-bg"))) {
+			const auto origOpacity = redashBG->getOpacity();
 			redashBG->setOpacity(0);
-			redashBG->runAction(CCFadeIn::create(.25f));
+			redashBG->runAction(CCFadeTo::create(.25f, origOpacity));
 		}
 
 		return true;
