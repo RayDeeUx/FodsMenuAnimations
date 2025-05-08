@@ -139,7 +139,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
-			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
+			if (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
@@ -212,9 +212,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		i = 0;
 
-		CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu;
-		if (theMenuToSlideFromRight) {
-			if (VANILLA_PAGES_MENULAYER_BOTTOM) {
+		if (CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu) {
+			if (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu) {
 				const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
 				CCDelayTime* delay = CCDelayTime::create(1.f);
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
@@ -236,17 +235,17 @@ class $modify(MyMenuLayer, MenuLayer) {
 					i++;
 				}
 			}
-		}
 
-		if (CCNode* alphaRightNav = this->getChildByID("right-side-menu-navigation-menu")) {
-			for (CCNode* node : CCArrayExt<CCNode*>(alphaRightNav->getChildren())) {
-				const float nodeOrigXPos = node->getPositionX();
-
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(rightSideMenu->getChildrenCount()) * .25f) + 2.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
-
-				node->setPositionX(nodeOrigXPos + 100.f);
-				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+			if (CCNode* alphaRightNav = this->getChildByID("right-side-menu-navigation-menu")) {
+				for (CCNode* node : CCArrayExt<CCNode*>(alphaRightNav->getChildren())) {
+					const float nodeOrigXPos = node->getPositionX();
+	
+					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(rightSideMenu->getChildrenCount()) * .25f) + 2.f);
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
+	
+					node->setPositionX(nodeOrigXPos + 100.f);
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				}
 			}
 		}
 		i = 0;
