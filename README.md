@@ -7,6 +7,8 @@ For a recap of what this mod does in HJfod's own words:
 > 
 > `...that's it.`
 
-Comes with support for Overcharged Main Menu out of the box.
+Comes with support for [Overcharged Main Menu](https://github.com/Weebifying/ReDash-geode) out of the box.
+
+Thanks to [km7](https://github.com/km7dev) and [hiimjasmine00](https://github.com/hiimjasmine00) for testing and bugsquashing!
 
 This [Geode mod](https://geode-sdk.org) is licensed under LGPLv2.

@@ -7,11 +7,13 @@ For a recap of what this mod does in HJfod's own words:
 > 
 > `...that's it.`
 
-Comes with support for Overcharged Main Menu out of the box.
+Comes with support for [Overcharged Main Menu](mod:ninxout.redash) out of the box.
 
 Could this mod's features have been replicated with [Happy Textures](mod:alphalaneous.happy_textures)?\
 Sure.\
 Am I going to do that?\
 No.
+
+Thanks to [km7](https://github.com/km7dev) and [hiimjasmine00](https://github.com/hiimjasmine00) for testing and bugsquashing!
 
 This [Geode mod](https://geode-sdk.org) is licensed under LGPLv2. To report bugs or get help with using my mods, press the Discord button in the lower left corner.

@@ -5,6 +5,13 @@
 // but what's done is done, and we can only move forward.
 // --raydeeux
 
+// if you know of a better way to port traditional mod
+// source code over to geode *AND* adapt it to today's
+// geode index, i'm all ears. have at it, and use fod's
+// source code as a reference:
+// https://raw.githubusercontent.com/HJfod/cool-menu-animation/v1.1/main.cpp
+// --raydeeux
+
 #include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
@@ -30,6 +37,15 @@ class $modify(MyMenuLayer, MenuLayer) {
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
 	}
 	bool init() {
+		/*
+			If you need more than 3 levels of indentation,
+			you're screwed anyway, and should fix your program.
+		*/
+		// i'm usually in the same camp with linus torvalds when
+		// it comes to levels of indentation, but i had to break
+		// his rule just this once for reasons you'll see shortly.
+		// (spoiler: cocos2d nullptr checks are really finicky)
+		// please forgive me for my flagrant transgression.
 		if (!MenuLayer::init()) return false;
 
 		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
@@ -46,6 +62,12 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return true;
 
+		// so here's a funny story about this code segment--
+		// one of the nodes i tried to apply an animation on
+		// wouldn't animate properly, then i realized that it
+		// was caused by stuff from YetAnotherModMenu (YAMM).
+		// so i just decided to skip a node if it was YAMM'd.
+		// --raydeeux
 		std::string nodeChosenByYAMM = "this-mod-doesnt-assign-node-ids-to-anything-lmfao"_spr;
 		if (geode::Mod* yamm = GET_YAMM; yamm && YAMM) {
 			const std::string& modID = yamm->getSettingValue<std::string>("pulseModID");
@@ -53,7 +75,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 			if (!modID.empty() && Loader::get()->isModLoaded(modID)) nodeChosenByYAMM = fmt::format("{}/{}", modID, nodeID);
 			else if (!nodeID.empty()) nodeChosenByYAMM = nodeID;
 		}
-
 
 		int i = 0;
 		if (const auto mainMenuChildren = mainMenu->getChildren()) {
