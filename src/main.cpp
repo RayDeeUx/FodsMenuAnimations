@@ -164,18 +164,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 					i++;
 				}
 			}
-
-			if (CCNode* alphaBottomNav = this->getChildByID("bottom-menu-navigation-menu"); alphaBottomNav && !REDASH) {
-				for (CCNode* node : CCArrayExt<CCNode*>(alphaBottomNav->getChildren())) {
-					const float nodeOrigYPos = node->getPositionY();
-
-					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(bottomMenu->getChildrenCount()) * .25f) + 2.f);
-					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
-
-					node->setPositionY(nodeOrigYPos - 75.f);
-					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-				}
-			}
 		}
 		i = 0;
 
@@ -233,18 +221,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 	
 					i++;
-				}
-			}
-
-			if (CCNode* alphaRightNav = this->getChildByID("right-side-menu-navigation-menu")) {
-				for (CCNode* node : CCArrayExt<CCNode*>(alphaRightNav->getChildren())) {
-					const float nodeOrigXPos = node->getPositionX();
-	
-					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(rightSideMenu->getChildrenCount()) * .25f) + 2.f);
-					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
-	
-					node->setPositionX(nodeOrigXPos + 100.f);
-					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 				}
 			}
 		}
