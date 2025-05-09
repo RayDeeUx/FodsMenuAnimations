@@ -14,6 +14,8 @@ Sure.\
 Am I going to do that?\
 No.
 
+To any "Nelly Nitpickers" or to those who used to use this mod in 2.1, you might notice *slight* deviations from the original animation. Such changes were minimal, and were meant to ensure better compatibility/interoperability with most, if not all, past/present/future mods on the Geode index.
+
 Thanks to [km7](https://github.com/km7dev) and [hiimjasmine00](https://github.com/hiimjasmine00) for testing and bugsquashing!
 
 This [Geode mod](https://geode-sdk.org) is licensed under LGPLv2. To report bugs or get help with using my mods, press the Discord button in the lower left corner.
