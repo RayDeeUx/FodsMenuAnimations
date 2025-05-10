@@ -45,12 +45,28 @@ using namespace geode::prelude;
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_EXTSN)
 
+bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
+
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
 		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", YAMM_ID);
 		else if (REDASH) (void) self.setHookPriorityAfterPost("MenuLayer::init", REDASH_ID);
 		else if (VANILLA_PAGES_LOADED) (void) self.setHookPriorityAfterPost("MenuLayer::init", VANILLA_PAGES_ID);
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
+	}
+	void determinePlayerVisibility(float dt) {
+		if (!Mod::get()->getSettingValue<bool>("enabled") || stopLooping) return;
+		if (Loader::get()->isModLoaded("undefined0.icon_ninja")) return;
+		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
+		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) return;
+		const float groundPos = m_menuGameLayer->m_groundLayer->getPositionY();
+		for (CCNode* node : CCArrayExt<CCNode*>(m_menuGameLayer->getChildren())) {
+			if (node == m_menuGameLayer->m_groundLayer || node == m_menuGameLayer->m_backgroundSprite) continue;
+			node->setVisible(false);
+			if (typeinfo_cast<CCMotionStreak*>(node) || typeinfo_cast<HardStreak*>(node)) continue;
+			if (groundPos > 89.f) node->setVisible(true);
+		}
+		if (groundPos > 89.f) stopLooping = true;
 	}
 	bool init() {
 		/*
@@ -143,34 +159,22 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren()) {
+			stopLooping = false;
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
-				if (node == m_menuGameLayer->m_backgroundSprite) continue;
-				if (typeinfo_cast<CCMotionStreak*>(node) || typeinfo_cast<HardStreak*>(node) || typeinfo_cast<CCParticleSystemQuad*>(node)) {
-					node->setVisible(false);
+				if (node != m_menuGameLayer->m_groundLayer) {
+					if (node != m_menuGameLayer->m_backgroundSprite) node->setVisible(false);
 					continue;
 				}
-				CCNodeRGBA* rgba = typeinfo_cast<CCNodeRGBA*>(node);
-				if (node == m_menuGameLayer->m_groundLayer || !rgba) {
-					const float origYPos = node->getPositionY();
+				const float origYPos = node->getPositionY();
 
-					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.5f));
-					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(2.f), { 0.f, origYPos }));
-					CCSequence* groundSequence = CCSequence::create(delay, eeoMove, nullptr);
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.5f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(2.f), { 0.f, origYPos }));
+				CCSequence* groundSequence = CCSequence::create(delay, eeoMove, nullptr);
 
-					node->setPositionY(0.f);
-					node->runAction(groundSequence);
-
-					continue;
-				}
-				const GLubyte origOpacity = rgba->getOpacity();
-
-				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.0f));
-				CCFadeTo* fadeIn = CCFadeTo::create(APPLY_ANIM_EXTENDERS(.5f), origOpacity);
-				CCSequence* sequence = CCSequence::create(delay, fadeIn, nullptr);
-
-				rgba->setOpacity(0);
-				rgba->runAction(sequence);
+				node->setPositionY(0.f);
+				node->runAction(groundSequence);
 			}
+			this->schedule(schedule_selector(MyMenuLayer::determinePlayerVisibility));
 		}
 
 		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
