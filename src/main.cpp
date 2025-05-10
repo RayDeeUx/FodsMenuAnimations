@@ -55,10 +55,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
 	}
 	void determinePlayerVisibility(float dt) {
-		if (!Mod::get()->getSettingValue<bool>("enabled") || stopLooping) return;
+		if (!Mod::get()->getSettingValue<bool>("enabled")) return;
 		if (Loader::get()->isModLoaded("undefined0.icon_ninja")) return;
 		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
-		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) return;
+		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
+			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
+			return;
+		}
+		if (stopLooping) return;
 		const float groundPos = m_menuGameLayer->m_groundLayer->getPositionY();
 		for (CCNode* node : CCArrayExt<CCNode*>(m_menuGameLayer->getChildren())) {
 			if (node == m_menuGameLayer->m_groundLayer || node == m_menuGameLayer->m_backgroundSprite) continue;
