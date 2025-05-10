@@ -29,13 +29,13 @@ using namespace geode::prelude;
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
-#define SPEED_SETTING Mod::get()->getSettingValue<double>("animation-speed")
+#define SPEED_SETTING speed
 #define SPEED_MIN .01f
 #define SPEED_MAX 16.f
-#define DELAY_SETTING Mod::get()->getSettingValue<double>("animation-delay")
+#define DELAY_SETTING delay
 #define DELAY_MIN .0f
 #define DELAY_MAX 10.f
-#define DURTN_SETTING Mod::get()->getSettingValue<double>("animation-duration")
+#define DURTN_SETTING addtlDuration
 #define DURTN_MIN .0f
 #define DURTN_MAX 2.f
 #define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
@@ -48,6 +48,14 @@ using namespace geode::prelude;
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
 
+bool enabled = true;
+bool classic = false;
+bool reverse = false;
+
+float speed = 1.0f;
+float delay = 0.0f;
+float addtlDuration = 0.0f;
+
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
 		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", YAMM_ID);
@@ -56,10 +64,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
 	}
 	void determinePlayerVisibility(float dt) {
-		if (!Mod::get()->getSettingValue<bool>("enabled")) return;
+		if (!enabled) return;
 		if (Loader::get()->isModLoaded("undefined0.icon_ninja")) return;
 		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
-		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
+		PlayerObject* player = m_menuGameLayer->m_playerObject;
+		if (!player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
 			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
 			else if (stopLooping && !jumpedAlready && player->m_isRobot) {
 				// in case any whiny kids start yelling at me for why the robot isnt jumping --raydeeux
@@ -73,7 +82,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		for (CCNode* node : CCArrayExt<CCNode*>(m_menuGameLayer->getChildren())) {
 			if (node == m_menuGameLayer->m_groundLayer || node == m_menuGameLayer->m_backgroundSprite) continue;
 			node->setVisible(false);
-			if (typeinfo_cast<CCMotionStreak*>(node) || typeinfo_cast<HardStreak*>(node)) continue;
+			if (node == player->m_waveTrail || node == player->m_regularTrail || node == player->m_shipStreak) continue;
 			if (groundPos > 89.f) node->setVisible(true);
 		}
 		if (groundPos > 89.f) stopLooping = true;
@@ -91,7 +100,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		// --raydeeux
 		if (!MenuLayer::init()) return false;
 
-		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
+		if (!enabled) return true;
 
 		CCNode* mainMenu = this->getChildByID("main-menu");
 		CCNode* bottomMenu = this->getChildByID("bottom-menu");
@@ -128,8 +137,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				if (node->getID() == "play-button") {
 					CCDelayTime* playButtonDelay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.75f));
-					CCFiniteTimeAction* eoScale = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f), 4.f));
-					CCFiniteTimeAction* eoRotate = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f), 4.f));
+					CCFiniteTimeAction* eoScale = !classic ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f), 4.f));
+					CCFiniteTimeAction* eoRotate = !classic ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f), 4.f));
 					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eoScale, eoRotate, nullptr);
 					CCSequence* scaleAndRotateSequencePlayButton = CCSequence::create(playButtonDelay, whyDidFodUseCCSpawnAgain, nullptr);
 
@@ -220,7 +229,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		i = 0;
 
 		if (auto sideMenuChildren = sideMenu->getChildren()) {
-			if (Mod::get()->getSettingValue<bool>("reverse-side-menus")) sideMenuChildren->reverseObjects();
+			if (reverse) sideMenuChildren->reverseObjects();
 			for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
 				if (!node->isVisible()) continue;
 				const float nodeOrigXPos = node->getPositionX();
@@ -261,7 +270,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
 				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
 			} else if (auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren()) {
-				if (Mod::get()->getSettingValue<bool>("reverse-side-menus")) rightSideMenuChildren->reverseObjects();
+				if (reverse) rightSideMenuChildren->reverseObjects();
 				for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
 					if (!node->isVisible()) continue;
 					const float nodeOrigXPos = node->getPositionX();
@@ -475,17 +484,43 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg");
 		if (!redashBG) return true;
-		if (CCScale9Sprite* ommBG = typeinfo_cast<CCScale9Sprite*>(redashBG)) {
-			const GLubyte origOpacity = ommBG->getOpacity();
+		CCScale9Sprite* ommBG = static_cast<CCScale9Sprite*>(redashBG)
+		const GLubyte origOpacity = ommBG->getOpacity();
 
-			CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.0f));
-			CCFadeTo* fadeIn = CCFadeTo::create(APPLY_ANIM_EXTENDERS(.5f), origOpacity);
-			CCSequence* sequence = CCSequence::create(delay, fadeIn, nullptr);
+		CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.0f));
+		CCFadeTo* fadeIn = CCFadeTo::create(APPLY_ANIM_EXTENDERS(.5f), origOpacity);
+		CCSequence* sequence = CCSequence::create(delay, fadeIn, nullptr);
 
-			ommBG->setOpacity(0);
-			ommBG->runAction(sequence);
-		}
+		ommBG->setOpacity(0);
+		ommBG->runAction(sequence);
 
 		return true;
 	}
 };
+
+$on_mod(Loaded) {
+	enabled = Mod::get()->getSettingValue<bool>("enabled");
+	classic = Mod::get()->getSettingValue<bool>("classic-play-button-anim");
+	reverse = Mod::get()->getSettingValue<bool>("reverse-side-menus");
+	speed = Mod::get()->getSettingValue<double>("animation-speed");
+	delay = Mod::get()->getSettingValue<double>("animation-delay");
+	addtlDuration = Mod::get()->getSettingValue<double>("animation-duration");
+	listenForSettingChanges<bool>("enabled", [](bool updatedEnabledSetting) {
+		enabled = updatedEnabledSetting;
+	});
+	listenForSettingChanges<double>("animation-speed", [](double speedUpdated) {
+		speed = speedUpdated;
+	});
+	listenForSettingChanges<double>("animation-delay", [](double delayUpdated) {
+		delay = delayUpdated;
+	});
+	listenForSettingChanges<double>("animation-duration", [](double addtlDurationUpdated) {
+		addtlDuration = addtlDurationUpdated;
+	});
+	listenForSettingChanges<bool>("classic-play-button-anim", [](bool newClassic) {
+		classic = newClassic;
+	});
+	listenForSettingChanges<bool>("reverse-side-menus", [](bool newReverse) {
+		reverse = newReverse;
+	});
+}
