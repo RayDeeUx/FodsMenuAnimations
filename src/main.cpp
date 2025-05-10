@@ -29,6 +29,19 @@ using namespace geode::prelude;
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
+#define SPEED_MIN .01f
+#define SPEED_MAX 16.f
+#define DELAY_MIN .0f
+#define DELAY_MAX 10.f
+#define DURTN_MIN .0f
+#define DURTN_MAX 2.f
+#define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
+#define ANIM_SPEED CLAMP_FLOAT(speed, SPEED_MIN, SPEED_MAX)
+#define ANIM_DELAY CLAMP_FLOAT(delay, DELAY_MIN, DELAY_MAX)
+#define ANIM_DURTN CLAMP_FLOAT(addtlDuration, DURTN_MIN, DURTN_MAX)
+#define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
+#define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
+
 bool enabled = true;
 bool classic = false;
 bool reverse = false;
@@ -36,22 +49,6 @@ bool reverse = false;
 float speed = 1.0f;
 float delay = 0.0f;
 float addtlDuration = 0.0f;
-
-#define SPEED_SETTING speed
-#define SPEED_MIN .01f
-#define SPEED_MAX 16.f
-#define DELAY_SETTING delay
-#define DELAY_MIN .0f
-#define DELAY_MAX 10.f
-#define DURTN_SETTING addtlDuration
-#define DURTN_MIN .0f
-#define DURTN_MAX 2.f
-#define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
-#define ANIM_SPEED CLAMP_FLOAT(SPEED_SETTING, SPEED_MIN, SPEED_MAX)
-#define ANIM_DELAY CLAMP_FLOAT(DELAY_SETTING, DELAY_MIN, DELAY_MAX)
-#define ANIM_DURTN CLAMP_FLOAT(DURTN_SETTING, DURTN_MIN, DURTN_MAX)
-#define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
-#define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
