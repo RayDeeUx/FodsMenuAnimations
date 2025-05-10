@@ -46,6 +46,7 @@ using namespace geode::prelude;
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_EXTSN)
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
+bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
 
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
@@ -60,7 +61,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
 		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
 			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
-			if (player->m_isRobot) m_menuGameLayer->tryJump(.001f); // in case any whiny kids start yelling at me for why the robot isnt jumping
+			else if (stopLooping && !jumpedAlready && player->m_isRobot) {
+				// in case any whiny kids start yelling at me for why the robot isnt jumping --raydeeux
+				m_menuGameLayer->tryJump(.1f);
+				jumpedAlready = true;
+			}
 			return;
 		}
 		if (stopLooping) return;
@@ -165,6 +170,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren()) {
 			stopLooping = false;
+			jumpedAlready = false;
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
 				if (node != m_menuGameLayer->m_groundLayer) {
 					if (node != m_menuGameLayer->m_backgroundSprite) node->setVisible(false);
