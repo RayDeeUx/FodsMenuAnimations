@@ -49,7 +49,59 @@
 				"arrows": true,
 				"big-arrows": true,
 				"arrow-step": 0.1,
-				"big-arrow-step": 1
+				"big-arrow-step": 1,
+				"slider-step": 0.01
+			}
+		},
+		"animation-speed": {
+			"name": "Animation Speed",
+			"description": "<cl>Original idea suggested by CherryChip.</c>\n\nIf you were expecting a genuine explanation for this...\n\n<cy>Fine, I suppose.</c>\nHigher number = faster animation.\nLower number = Slower animation.\n\n<c_>There, happy?</c>",
+			"type": "float",
+			"default": 1.0,
+			"min": 0.01,
+			"max": 16.0,
+			"control": {
+				"slider": true,
+				"input": true,
+				"arrows": true,
+				"big-arrows": true,
+				"arrow-step": 0.1,
+				"big-arrow-step": 1,
+				"slider-step": 0.01
+			}
+		},
+		"animation-delay": {
+			"name": "Animation Delay",
+			"description": "Adjust the amount of time before each animation starts.",
+			"type": "float",
+			"default": 0.0,
+			"min": 0.00,
+			"max": 10.0,
+			"control": {
+				"slider": true,
+				"input": true,
+				"arrows": true,
+				"big-arrows": true,
+				"arrow-step": 0.1,
+				"big-arrow-step": 1,
+				"slider-step": 0.01
+			}
+		},
+		"animation-extension": {
+			"name": "Animation Extension",
+			"description": "Adjust the amount of time each animation takes to finish.\n\n<cy>This setting is best left to its default value, as visual quirks WILL happen if used irresponsibly.\n\nTypically used to adjust the duration of each button's animation.</c>",
+			"type": "float",
+			"default": 0.0,
+			"min": 0.00,
+			"max": 10.0,
+			"control": {
+				"slider": true,
+				"input": true,
+				"arrows": true,
+				"big-arrows": true,
+				"arrow-step": 0.1,
+				"big-arrow-step": 1,
+				"slider-step": 0.01
 			}
 		}
 	},

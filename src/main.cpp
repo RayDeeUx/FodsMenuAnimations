@@ -29,6 +29,22 @@ using namespace geode::prelude;
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
+#define SPEED_SETTING Mod::get()->getSettingValue<double>("animation-speed")
+#define SPEED_MIN .01f
+#define SPEED_MAX 16.f
+#define DELAY_SETTING Mod::get()->getSettingValue<double>("animation-delay")
+#define DELAY_MIN .0f
+#define DELAY_MAX 10.f
+#define EXTSN_SETTING Mod::get()->getSettingValue<double>("animation-extension")
+#define EXTSN_MIN .0f
+#define EXTSN_MAX 2.f
+#define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
+#define ANIM_SPEED CLAMP_FLOAT(SPEED_SETTING, SPEED_MIN, SPEED_MAX)
+#define ANIM_DELAY CLAMP_FLOAT(DELAY_SETTING, DELAY_MIN, DELAY_MAX)
+#define ANIM_EXTSN CLAMP_FLOAT(EXTSN_SETTING, EXTSN_MIN, EXTSN_MAX)
+#define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
+#define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_EXTSN)
+
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
 		if (YAMM) (void) self.setHookPriorityAfterPost("MenuLayer::init", YAMM_ID);
@@ -85,17 +101,17 @@ class $modify(MyMenuLayer, MenuLayer) {
 				node->setRotation(node->getID() == "play-button" ? -90.f : 90.f);
 
 				if (node->getID() == "play-button") {
-					CCDelayTime* playButtonDelay = CCDelayTime::create(.75f);
-					CCFiniteTimeAction* eoScale = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(1.25f, 1.f), 4.f));
-					CCFiniteTimeAction* eoRotate = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(1.25f, 0.f), 4.f));
+					CCDelayTime* playButtonDelay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.75f));
+					CCFiniteTimeAction* eoScale = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f), 4.f));
+					CCFiniteTimeAction* eoRotate = !Mod::get()->getSettingValue<bool>("classic-play-button-anim") ? static_cast<CCFiniteTimeAction*>(CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f))) : static_cast<CCFiniteTimeAction*>(CCEaseOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f), 4.f));
 					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eoScale, eoRotate, nullptr);
 					CCSequence* scaleAndRotateSequencePlayButton = CCSequence::create(playButtonDelay, whyDidFodUseCCSpawnAgain, nullptr);
 
 					node->runAction(scaleAndRotateSequencePlayButton);
 				} else {
-					CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
-					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
-					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + .5f)));
+					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f));
+					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f));
 					CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
 					CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
@@ -108,8 +124,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		i = 0; // reset incrementer
 
 		if (CCNode* title = this->getChildByIDRecursive("main-title"); title && !(IS_AFFECTED_BY_YAMM(title))) {
-			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(2.f, 1.f));
-			CCDelayTime* delay = CCDelayTime::create(.25f);
+			CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.25f));
+			CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(2.f), 1.f));
 			CCSequence* titleSequence = CCSequence::create(delay, eboScale, nullptr);
 
 			title->setScale(0.f);
@@ -118,8 +134,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		if (const auto playerChildren = playerUsername->getChildren()) {
 			for (CCNode* sprite : CCArrayExt<CCNode*>(playerChildren)) {
-				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(sprite->getTag())) + .5f);
-				CCEaseElasticOut* eeoScale = CCEaseElasticOut::create(CCScaleTo::create(1.f, 1.f));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(sprite->getTag())) + .5f)));
+				CCEaseElasticOut* eeoScale = CCEaseElasticOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
 				CCSequence* usernameCharSequence = CCSequence::create(delay, eeoScale, nullptr);
 				sprite->setScale(0.f);
 				sprite->runAction(usernameCharSequence);
@@ -130,8 +146,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
 				const float origYPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create(.5f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(2.f, { 0.f, origYPos }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.5f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(2.f), { 0.f, origYPos }));
 				CCSequence* groundSequence = CCSequence::create(delay, eeoMove, nullptr);
 				node->setPositionY(0.f);
 				node->runAction(groundSequence);
@@ -141,8 +157,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
 			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu)) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
-				CCDelayTime* delay = CCDelayTime::create(1.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 100.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 100.f }));
 
 				theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
 				theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -151,16 +167,17 @@ class $modify(MyMenuLayer, MenuLayer) {
 				for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
 					if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
 					const float nodeOriginalScale = node->getScale();
-					CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
-					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
-	
-					CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-					CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.25f)), 4.f);
-					CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
-	
+					CCDelayTime* delayOne = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 1.f)));
+					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), nodeOriginalScale));
+
+					CCDelayTime* delayTwo = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f / ANIM_SPEED, (nodeOriginalScale * 1.25f)), 4.f);
+					CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f / ANIM_SPEED, nodeOriginalScale));
+
 					node->setScale(0.f);
 					node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
 					node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
+
 					i++;
 				}
 			}
@@ -173,8 +190,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (!node->isVisible()) continue;
 				const float nodeOrigXPos = node->getPositionX();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 100.f, 0.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 100.f, 0.f }));
 
 				node->setPositionX(nodeOrigXPos - 100.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -189,8 +206,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (!node->isVisible()) continue;
 				const float nodeOrigXPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -100.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -100.f }));
 
 				node->setPositionY(nodeOrigXPos + 100.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -203,8 +220,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu) {
 			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu)) {
 				const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
-				CCDelayTime* delay = CCDelayTime::create(1.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { -100.f, 0.f }));
 
 				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
 				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -213,13 +230,13 @@ class $modify(MyMenuLayer, MenuLayer) {
 				for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
 					if (!node->isVisible()) continue;
 					const float nodeOrigXPos = node->getPositionX();
-	
-					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { -100.f, 0.f }));
-	
+
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { -100.f, 0.f }));
+
 					node->setPositionX(nodeOrigXPos + 100.f);
 					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
-	
+
 					i++;
 				}
 			}
@@ -235,6 +252,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				node->setScale(0.f);
 				node->runAction(sequence);
+
 				i++;
 			}
 		}
@@ -244,13 +262,13 @@ class $modify(MyMenuLayer, MenuLayer) {
 			if (const auto closeChildren = closeMenu->getChildren()) {
 				for (CCNode* node : CCArrayExt<CCNode*>(closeChildren)) {
 					if (IS_AFFECTED_BY_YAMM(node)) continue;
-					CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")));
-					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.25f, 1.f));
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")))));
+					CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f));
 					CCSequence* sequence = CCSequence::create(delay, eeoScale, nullptr);
-		
+
 					node->setScale(0.f);
 					node->runAction(sequence);
-		
+
 					i++;
 				}
 			}
@@ -260,9 +278,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (const auto mgChildren = moreGamesMenu->getChildren()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(mgChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
-				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + 2.f);
-				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(i)) + 2.f)));
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.f), 0.f));
 				CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
 				CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
@@ -278,9 +296,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (const auto profileChildren = profileMenu->getChildren()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(profileChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
-				CCDelayTime* delay = CCDelayTime::create((.2f * static_cast<float>(i)) + .5f);
-				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(i)) + .5f)));
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.f), 0.f));
 				CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
 				CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
 
@@ -308,9 +326,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (const auto ommMain = redashMain->getChildren()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommMain)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
-				CCDelayTime* delay = CCDelayTime::create((.25f * static_cast<float>(i)) + .5f);
-				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.25f, 1.f));
-				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.25f, 0.f));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + .5f)));
+				CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.25f), 1.f));
+				CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.25f), 0.f));
 				CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
 				CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
@@ -327,12 +345,12 @@ class $modify(MyMenuLayer, MenuLayer) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommDailies)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOriginalScale = node->getScale();
-				CCDelayTime* delayOne = CCDelayTime::create((static_cast<float>(i) * .25f) + 1.f);
-				CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(1.f, nodeOriginalScale));
+				CCDelayTime* delayOne = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 1.f)));
+				CCEaseExponentialOut* eeoScale = CCEaseExponentialOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), nodeOriginalScale));
 
-				CCDelayTime* delayTwo = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-				CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f, (nodeOriginalScale * 1.1f)), 4.f);
-				CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f, nodeOriginalScale));
+				CCDelayTime* delayTwo = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+				CCEaseIn* eiScale = CCEaseIn::create(CCScaleTo::create(.25f / ANIM_SPEED, (nodeOriginalScale * 1.1f)), 4.f);
+				CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(.75f / ANIM_SPEED, nodeOriginalScale));
 
 				node->setScale(0.f);
 				node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
@@ -348,8 +366,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .375f) + 1.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -75.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .375f) + 1.f)));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -75.f }));
 
 				node->setPositionY(nodeOrigYPos + 75.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -364,8 +382,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f) + 1.f);
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .5f) + 1.f)));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 75.f }));
 
 				node->setPositionY(nodeOrigYPos - 75.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -380,8 +398,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
 
-				CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .5f));
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, 75.f }));
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS((static_cast<float>(i) * .5f)));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 75.f }));
 
 				node->setPositionY(nodeOrigYPos - 75.f);
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
@@ -398,15 +416,15 @@ class $modify(MyMenuLayer, MenuLayer) {
 				if (node->getID() == "garage-rope") {
 					const float nodeOrigYPos = node->getPositionY();
 
-					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(1.f, { 0.f, -75.f }));
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -75.f }));
 
 					node->setPositionY(nodeOrigYPos + 75.f);
 					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 				} else {
-					CCDelayTime* delay = CCDelayTime::create((static_cast<float>(i) * .25f) + 2.f);
-					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(1.f, 1.f));
-					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(1.f, 0.f));
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseBackOut* eboScale = CCEaseBackOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
+					CCEaseBackOut* eboRotate = CCEaseBackOut::create(CCRotateTo::create(APPLY_ANIM_EXTENDERS(1.f), 0.f));
 					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eboScale, eboRotate, nullptr);
 					CCSequence* sequence = CCSequence::create(delay, whyDidFodUseCCSpawnAgain, nullptr);
 
@@ -422,8 +440,13 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		if (CCScale9Sprite* redashBG = typeinfo_cast<CCScale9Sprite*>(this->getChildByID("ninxout.redash/bottom-menu-bg"))) {
 			const auto origOpacity = redashBG->getOpacity();
+
+			CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.0f));
+			CCFadeTo* fadeIn = CCFadeTo::create(APPLY_ANIM_MODIFIERS(.5f), origOpacity);
+			CCSequence* sequence = CCSequence::create(delay, fadeIn, nullptr);
+
 			redashBG->setOpacity(0);
-			redashBG->runAction(CCFadeTo::create(.5f, origOpacity));
+			redashBG->runAction(sequence);
 		}
 
 		return true;
