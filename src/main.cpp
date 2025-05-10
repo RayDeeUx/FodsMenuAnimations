@@ -29,6 +29,14 @@ using namespace geode::prelude;
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
+bool enabled = true;
+bool classic = false;
+bool reverse = false;
+
+float speed = 1.0f;
+float delay = 0.0f;
+float addtlDuration = 0.0f;
+
 #define SPEED_SETTING speed
 #define SPEED_MIN .01f
 #define SPEED_MAX 16.f
@@ -47,14 +55,6 @@ using namespace geode::prelude;
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
-
-bool enabled = true;
-bool classic = false;
-bool reverse = false;
-
-float speed = 1.0f;
-float delay = 0.0f;
-float addtlDuration = 0.0f;
 
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
