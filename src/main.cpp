@@ -35,15 +35,15 @@ using namespace geode::prelude;
 #define DELAY_SETTING Mod::get()->getSettingValue<double>("animation-delay")
 #define DELAY_MIN .0f
 #define DELAY_MAX 10.f
-#define EXTSN_SETTING Mod::get()->getSettingValue<double>("animation-extension")
-#define EXTSN_MIN .0f
-#define EXTSN_MAX 2.f
+#define DURTN_SETTING Mod::get()->getSettingValue<double>("animation-duration")
+#define DURTN_MIN .0f
+#define DURTN_MAX 2.f
 #define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
 #define ANIM_SPEED CLAMP_FLOAT(SPEED_SETTING, SPEED_MIN, SPEED_MAX)
 #define ANIM_DELAY CLAMP_FLOAT(DELAY_SETTING, DELAY_MIN, DELAY_MAX)
-#define ANIM_EXTSN CLAMP_FLOAT(EXTSN_SETTING, EXTSN_MIN, EXTSN_MAX)
+#define ANIM_DURTN CLAMP_FLOAT(DURTN_SETTING, DURTN_MIN, DURTN_MAX)
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
-#define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_EXTSN)
+#define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux

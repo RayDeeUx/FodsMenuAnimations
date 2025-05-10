@@ -87,8 +87,8 @@
 				"slider-step": 0.01
 			}
 		},
-		"animation-extension": {
-			"name": "Animation Extension",
+		"animation-duration": {
+			"name": "Additional Animation Duration",
 			"description": "Adjust the amount of time each animation takes to finish.\n\n<cy>This setting is best left to its default value, as visual quirks WILL happen if used irresponsibly.\n\nTypically used to adjust the duration of each button's animation.</c>",
 			"type": "float",
 			"default": 0.0,
