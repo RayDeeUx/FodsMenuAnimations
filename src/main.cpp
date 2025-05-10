@@ -145,7 +145,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
 				if (node == m_menuGameLayer->m_backgroundSprite) continue;
-				if (typeinfo_cast<CCMotionStreak*>(node) || typeinfo_cast<HardStreak*>(node)) {
+				if (typeinfo_cast<CCMotionStreak*>(node) || typeinfo_cast<HardStreak*>(node) || typeinfo_cast<CCParticleSystemQuad*>(node)) {
 					node->setVisible(false);
 					continue;
 				}
