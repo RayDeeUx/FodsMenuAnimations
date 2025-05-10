@@ -60,7 +60,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
 		if (PlayerObject* player = m_menuGameLayer->m_playerObject; !player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
 			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
-			if (player->m_isRobot) player->tryJump(.001f); // in case any whiny kids start yelling at me for why the robot isnt jumping
+			if (player->m_isRobot) m_menuGameLayer->tryJump(.001f); // in case any whiny kids start yelling at me for why the robot isnt jumping
 			return;
 		}
 		if (stopLooping) return;
