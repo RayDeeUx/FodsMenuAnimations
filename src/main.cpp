@@ -35,9 +35,9 @@ using namespace geode::prelude;
 #define DELAY_MAX 10.f
 #define DURTN_MIN .0f
 #define DURTN_MAX 2.f
-#define CLAMP_FLOAT(setting, min, max) static_cast<float>(setting < min ? min : (setting > max ? max : setting))
+#define CLAMP_FLOAT(setting, min, max) std::clamp(setting, min, max)
 #define ANIM_SPEED CLAMP_FLOAT(speed, SPEED_MIN, SPEED_MAX)
-#define ANIM_DELAY CLAMP_FLOAT(delay, DELAY_MIN, DELAY_MAX)
+#define ANIM_DELAY CLAMP_FLOAT(delaySetting, DELAY_MIN, DELAY_MAX)
 #define ANIM_DURTN CLAMP_FLOAT(addtlDuration, DURTN_MIN, DURTN_MAX)
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
@@ -47,7 +47,7 @@ bool classic = false;
 bool reverse = false;
 
 float speed = 1.0f;
-float delay = 0.0f;
+float delaySetting = 0.0f;
 float addtlDuration = 0.0f;
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
@@ -481,7 +481,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg");
 		if (!redashBG) return true;
-		CCScale9Sprite* ommBG = static_cast<CCScale9Sprite*>(redashBG)
+		CCScale9Sprite* ommBG = static_cast<CCScale9Sprite*>(redashBG);
 		const GLubyte origOpacity = ommBG->getOpacity();
 
 		CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.0f));
@@ -500,7 +500,7 @@ $on_mod(Loaded) {
 	classic = Mod::get()->getSettingValue<bool>("classic-play-button-anim");
 	reverse = Mod::get()->getSettingValue<bool>("reverse-side-menus");
 	speed = Mod::get()->getSettingValue<double>("animation-speed");
-	delay = Mod::get()->getSettingValue<double>("animation-delay");
+	delaySetting = Mod::get()->getSettingValue<double>("animation-delay");
 	addtlDuration = Mod::get()->getSettingValue<double>("animation-duration");
 	listenForSettingChanges<bool>("enabled", [](bool updatedEnabledSetting) {
 		enabled = updatedEnabledSetting;
@@ -509,7 +509,7 @@ $on_mod(Loaded) {
 		speed = speedUpdated;
 	});
 	listenForSettingChanges<double>("animation-delay", [](double delayUpdated) {
-		delay = delayUpdated;
+		delaySetting = delayUpdated;
 	});
 	listenForSettingChanges<double>("animation-duration", [](double addtlDurationUpdated) {
 		addtlDuration = addtlDurationUpdated;
