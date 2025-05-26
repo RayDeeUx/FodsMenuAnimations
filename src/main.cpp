@@ -561,4 +561,7 @@ $on_mod(Loaded) {
 	listenForSettingChanges<bool>("reverse-side-menus", [](bool newReverse) {
 		reverse = newReverse;
 	});
+	listenForSettingChanges<bool>("add-replay-button", [](bool updatedReplayBtn) {
+		rplyBtn = updatedReplayBtn;
+	});
 }
