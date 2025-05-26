@@ -98,9 +98,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (groundPos > 89.f) stopLooping = true;
 	}
 	void allowReplay(float dt) {
-		if (alowRpy || elapsedTime >= (REPLAY_COOLDOWN)) this->unschedule(schedule_selector(MyMenuLayer::allowReplay));
+		if (alowRpy || elapsedTime >= REPLAY_COOLDOWN) this->unschedule(schedule_selector(MyMenuLayer::allowReplay));
 		elapsedTime += dt;
-		if (elapsedTime < (REPLAY_COOLDOWN)) return;
+		log::info("elapsedTime: {}", elapsedTime);
+		log::info("elapsedTime < REPLAY_COOLDOWN: {}", elapsedTime < REPLAY_COOLDOWN);
+		if (elapsedTime < REPLAY_COOLDOWN) return;
 		elapsedTime = 0.f;
 		alowRpy = true;
 	}
