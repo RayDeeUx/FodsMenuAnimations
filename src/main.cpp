@@ -104,7 +104,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		elapsedTime += dt;
 		if (elapsedTime < REPLAY_COOLDOWN) return;
-		if (CCNode* animateButton = this->getChildByID("animate-button"_spr)) static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({255, 255, 255});
+		if (CCNode* animateButton = this->getChildByID("animate-button"_spr)) {
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setEnabled(true);
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({255, 255, 255});
+		}
 		elapsedTime = 0.f;
 		alowRpy = true;
 	}
@@ -132,6 +135,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			CCMenuItemSpriteExtra* animateButton = CCMenuItemSpriteExtra::create(CircleButtonSprite::create(animateSprite), this, menu_selector(MyMenuLayer::animateWrapper));
 			animateButton->setID("animate-button"_spr);
 			animateButton->setColor({128, 128, 128});
+			animateButton->setEnabled(false);
 			animateButton->setTag(5282025);
 			bottomMenu->addChild(animateButton);
 			bottomMenu->updateLayout();
