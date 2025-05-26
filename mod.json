@@ -32,6 +32,12 @@
 			"type": "bool",
 			"default": false
 		},
+		"add-replay-button": {
+			"name": "Add Replay Button",
+			"description": "Adds a button to replay the animation.",
+			"type": "bool",
+			"default": false
+		},
 		"close-menu-delay": {
 			"name": "Close Menu Delay",
 			"description": "Adjust the delay for the close menu.\n\n<cy>For closing the game more gracefully without having to wait for the animation to finish.</c>",
