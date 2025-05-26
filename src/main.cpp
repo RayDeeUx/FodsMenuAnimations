@@ -55,6 +55,8 @@ float speed = 1.0f;
 float delaySetting = 0.0f;
 float addtlDuration = 0.0f;
 
+int highestI = 0;
+
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
 
@@ -169,7 +171,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		int i = 0;
-		int highestI = 0;
+		highestI = 0;
 		if (const auto mainMenuChildren = mainMenu->getChildren(); mainMenuChildren && mainMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(mainMenuChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
