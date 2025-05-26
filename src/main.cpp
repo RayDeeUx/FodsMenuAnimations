@@ -42,8 +42,8 @@ using namespace geode::prelude;
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
 #define UPDATE_I\
-	i = 0;\
-	if (highestI < i) highestI = i;
+	if (highestI < i) highestI = i;\
+	i = 0;
 
 bool enabled = true;
 bool classic = false;
