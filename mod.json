@@ -32,6 +32,12 @@
 			"type": "bool",
 			"default": false
 		},
+		"add-replay-button": {
+			"name": "Add Replay Button",
+			"description": "Adds a button to replay the animation.\n\n## <cy>***__Yes, there's supposed to be a cooldown for the button. Don't act surprised over this intentional design choice.__***</c>",
+			"type": "bool",
+			"default": false
+		},
 		"close-menu-delay": {
 			"name": "Close Menu Delay",
 			"description": "Adjust the delay for the close menu.\n\n<cy>For closing the game more gracefully without having to wait for the animation to finish.</c>",

@@ -41,14 +41,24 @@ using namespace geode::prelude;
 #define ANIM_DURTN CLAMP_FLOAT(addtlDuration, DURTN_MIN, DURTN_MAX)
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
+#define REPLAY_COOLDOWN APPLY_ANIM_EXTENDERS(highestI)
+#define UPDATE_I\
+	if (highestI < i) highestI = i;\
+	i = 0;
 
 bool enabled = true;
 bool classic = false;
 bool reverse = false;
+bool rplyBtn = false;
+bool alowRpy = false;
 
 float speed = 1.0f;
 float delaySetting = 0.0f;
 float addtlDuration = 0.0f;
+
+int highestI = 0;
+
+float elapsedTime = 0.f;
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
@@ -65,7 +75,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (Loader::get()->isModLoaded("undefined0.icon_ninja")) return;
 		if (!m_menuGameLayer || !m_menuGameLayer->getChildren()) return;
 		PlayerObject* player = m_menuGameLayer->m_playerObject;
-		if (!player || player->getPositionX() > 0.f || player->getRealPosition().x > 0.f) {
+		if (player && (player->getPositionX() > 0.f || player->getRealPosition().x > 0.f)) {
 			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
 			else if (stopLooping && !jumpedAlready && player->m_isRobot) {
 				// in case any whiny kids start yelling at me for why the robot isnt jumping --raydeeux
@@ -74,7 +84,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 			return;
 		}
-		if (stopLooping) return;
+		if (stopLooping) {
+			if (jumpedAlready) this->unschedule(schedule_selector(MyMenuLayer::determinePlayerVisibility));
+			return;
+		}
 		const float groundPos = m_menuGameLayer->m_groundLayer->getPositionY();
 		for (CCNode* node : CCArrayExt<CCNode*>(m_menuGameLayer->getChildren())) {
 			if (node == m_menuGameLayer->m_groundLayer || node == m_menuGameLayer->m_backgroundSprite) continue;
@@ -84,10 +97,24 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		if (groundPos > 89.f) stopLooping = true;
 	}
+	void allowReplay(float dt) {
+		if (alowRpy || elapsedTime >= REPLAY_COOLDOWN) {
+			this->unschedule(schedule_selector(MyMenuLayer::allowReplay));
+			return;
+		}
+		elapsedTime += dt;
+		if (elapsedTime < REPLAY_COOLDOWN) return;
+		if (CCNode* animateButton = this->getChildByIDRecursive("animate-button"_spr)) {
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setEnabled(true);
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({255, 255, 255});
+		}
+		elapsedTime = 0.f;
+		alowRpy = true;
+	}
 	bool init() {
 		/*
-			If you need more than 3 levels of indentation,
-			you're screwed anyway, and should fix your program.
+		If you need more than 3 levels of indentation,
+		you're screwed anyway, and should fix your program.
 		*/
 		// i'm usually in the same camp with linus torvalds when
 		// it comes to levels of indentation, but i had to break
@@ -97,7 +124,34 @@ class $modify(MyMenuLayer, MenuLayer) {
 		// --raydeeux
 		if (!MenuLayer::init()) return false;
 
-		if (!enabled) return true;
+		alowRpy = false;
+		elapsedTime = 0.f;
+		CCNode* menu = REDASH ? this->getChildByID("right-side-menu") : this->getChildByID("bottom-menu");
+		if (!enabled || !menu) return true;
+		if (rplyBtn) {
+			CCSprite* animateSprite = CCSprite::createWithSpriteFrameName("edit_eAnimateBtn_001.png");
+			animateSprite->setScale(336.f / 162.f);
+			animateSprite->setID("animate-sprite"_spr);
+			CCMenuItemSpriteExtra* animateButton = CCMenuItemSpriteExtra::create(CircleButtonSprite::create(animateSprite), this, menu_selector(MyMenuLayer::animateWrapper));
+			animateButton->setID("animate-button"_spr);
+			animateButton->setTag(5282025);
+			menu->addChild(animateButton);
+			menu->updateLayout();
+		}
+
+		Loader::get()->queueInMainThread([this] {
+			MyMenuLayer::animate();
+		});
+
+		return true;
+	}
+	void animateWrapper(CCObject* sender) {
+		if (!enabled || !alowRpy || !rplyBtn || !sender || sender->getTag() != 5282025) return;
+		MyMenuLayer::animate();
+	}
+	void animate() {
+		if (!enabled) return;
+		alowRpy = false;
 
 		CCNode* mainMenu = this->getChildByID("main-menu");
 		CCNode* bottomMenu = this->getChildByID("bottom-menu");
@@ -109,7 +163,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* moreGamesMenu = this->getChildByID("more-games-menu");
 		CCNode* playerUsername = this->getChildByID("player-username");
 
-		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return true;
+		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return;
 
 		// so here's a funny story about this code segment--
 		// one of the nodes i tried to apply an animation on
@@ -125,8 +179,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 			else if (!nodeID.empty()) nodeChosenByYAMM = nodeID;
 		}
 
+		if (CCNode* animateButton = this->getChildByIDRecursive("animate-button"_spr)) {
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setEnabled(false);
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({128, 128, 128});
+		}
+
 		int i = 0;
-		if (const auto mainMenuChildren = mainMenu->getChildren()) {
+		highestI = 0;
+		if (const auto mainMenuChildren = mainMenu->getChildren(); mainMenuChildren && mainMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(mainMenuChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				node->setScale(0.f);
@@ -153,7 +213,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0; // reset incrementer
+		UPDATE_I
 
 		if (CCNode* title = this->getChildByIDRecursive("main-title"); title && !(IS_AFFECTED_BY_YAMM(title))) {
 			CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(.25f));
@@ -164,7 +224,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			title->runAction(titleSequence);
 		}
 
-		if (const auto playerChildren = playerUsername->getChildren()) {
+		if (const auto playerChildren = playerUsername->getChildren(); playerChildren && playerUsername->isVisible()) {
 			for (CCNode* sprite : CCArrayExt<CCNode*>(playerChildren)) {
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(sprite->getTag())) + .5f)));
 				CCEaseElasticOut* eeoScale = CCEaseElasticOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
@@ -174,7 +234,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 
-		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren()) {
+		if (CCNode* iThrewItOnTheGround = m_menuGameLayer; !Loader::get()->isModLoaded("undefined0.icon_ninja") && iThrewItOnTheGround && iThrewItOnTheGround->getChildren() && iThrewItOnTheGround->isVisible()) {
 			stopLooping = false;
 			jumpedAlready = false;
 			for (CCNode* node : CCArrayExt<CCNode*>(iThrewItOnTheGround->getChildren())) {
@@ -202,7 +262,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
 				theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
-			} else if (auto tMTSFZChildren = theMenuToScaleFromZero->getChildren()) {
+			} else if (auto tMTSFZChildren = theMenuToScaleFromZero->getChildren(); tMTSFZChildren && theMenuToScaleFromZero->isVisible()) {
 				if (REDASH) tMTSFZChildren->reverseObjects();
 				for (CCNode* node : CCArrayExt<CCNode*>(tMTSFZChildren)) {
 					if (!node->isVisible() || IS_AFFECTED_BY_YAMM(node)) continue;
@@ -223,9 +283,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				}
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (auto sideMenuChildren = sideMenu->getChildren()) {
+		if (auto sideMenuChildren = sideMenu->getChildren(); sideMenuChildren && sideMenu->isVisible()) {
 			if (reverse) sideMenuChildren->reverseObjects();
 			for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
 				if (!node->isVisible()) continue;
@@ -240,9 +300,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto topRightChildren = topRightMenu->getChildren()) {
+		if (const auto topRightChildren = topRightMenu->getChildren(); topRightChildren && topRightMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(topRightChildren)) {
 				if (!node->isVisible()) continue;
 				const float nodeOrigXPos = node->getPositionY();
@@ -256,7 +316,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
 		if (CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu) {
 			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu)) {
@@ -266,7 +326,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
 				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
-			} else if (auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren()) {
+			} else if (auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren(); rightSideMenuChildren && theMenuToSlideFromRight->isVisible()) {
 				if (reverse) rightSideMenuChildren->reverseObjects();
 				for (CCNode* node : CCArrayExt<CCNode*>(rightSideMenuChildren)) {
 					if (!node->isVisible()) continue;
@@ -282,9 +342,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				}
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto socialMediaChildren = socialMediaMenu->getChildren()) {
+		if (const auto socialMediaChildren = socialMediaMenu->getChildren(); socialMediaChildren && socialMediaMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(socialMediaChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(i)) + 1.5f)));
@@ -297,10 +357,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
 		if (CCNode* closeMenu = this->getChildByID("close-menu")) {
-			if (const auto closeChildren = closeMenu->getChildren()) {
+			if (const auto closeChildren = closeMenu->getChildren(); closeChildren && closeMenu->isVisible()) {
 				for (CCNode* node : CCArrayExt<CCNode*>(closeChildren)) {
 					if (IS_AFFECTED_BY_YAMM(node)) continue;
 					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + static_cast<float>(Mod::get()->getSettingValue<double>("close-menu-delay")))));
@@ -314,9 +374,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				}
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto mgChildren = moreGamesMenu->getChildren()) {
+		if (const auto mgChildren = moreGamesMenu->getChildren(); mgChildren && moreGamesMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(mgChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(i)) + 2.f)));
@@ -332,9 +392,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto profileChildren = profileMenu->getChildren()) {
+		if (const auto profileChildren = profileMenu->getChildren(); profileChildren && profileMenu->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(profileChildren)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.2f * static_cast<float>(i)) + .5f)));
@@ -350,11 +410,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
 		CCNode* redashMenu = REDASH ? this->getChildByID("ninxout.redash/redash-menu") : nullptr;
 		CCNode* redashHide = REDASH ? this->getChildByID("ninxout.redash/hide-button-menu") : nullptr;
-		if (!REDASH || !redashMenu || !redashHide) return true;
+		if (!REDASH || !redashMenu || !redashHide) {
+			if (rplyBtn) this->schedule(schedule_selector(MyMenuLayer::allowReplay));
+			return;
+		}
 
 		CCNode* redashMain = redashMenu->getChildByID("ninxout.redash/main-menu"); // rotate + scale
 		CCNode* redashDailies = redashMenu->getChildByID("ninxout.redash/dailies-menu"); // scale
@@ -362,9 +425,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* redashBottom = redashMenu->getChildByID("ninxout.redash/bottom-menu"); // move from bottom
 		CCNode* redashTop = redashMenu->getChildByID("ninxout.redash/top-menu"); // scale lock, move rope
 
-		if (!redashMain || !redashDailies || !redashStats || !redashBottom || !redashTop) return true;
+		if (!redashMain || !redashDailies || !redashStats || !redashBottom || !redashTop) return;
 
-		if (const auto ommMain = redashMain->getChildren()) {
+		if (const auto ommMain = redashMain->getChildren(); ommMain && redashMain->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommMain)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + .5f)));
@@ -380,9 +443,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto ommDailies = redashDailies->getChildren()) {
+		if (const auto ommDailies = redashDailies->getChildren(); ommDailies && redashDailies->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommDailies)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOriginalScale = node->getScale();
@@ -400,9 +463,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto ommStats = redashStats->getChildren()) {
+		if (const auto ommStats = redashStats->getChildren(); ommStats && redashStats->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommStats)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
@@ -416,9 +479,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto ommButtom = redashBottom->getChildren()) {
+		if (const auto ommButtom = redashBottom->getChildren(); ommButtom && redashBottom->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommButtom)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
@@ -432,9 +495,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (const auto ommHide = redashHide->getChildren()) {
+		if (const auto ommHide = redashHide->getChildren(); ommHide && redashHide->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommHide)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
 				const float nodeOrigYPos = node->getPositionY();
@@ -448,9 +511,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
-		if (auto ommTop = redashTop->getChildren()) {
+		if (auto ommTop = redashTop->getChildren(); ommTop && redashTop->isVisible()) {
 			ommTop->reverseObjects();
 			for (CCNode* node : CCArrayExt<CCNode*>(ommTop)) {
 				if (IS_AFFECTED_BY_YAMM(node)) continue;
@@ -477,10 +540,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 				i++;
 			}
 		}
-		i = 0;
+		UPDATE_I
 
 		CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg");
-		if (!redashBG) return true;
+		if (!redashBG) return;
 		CCScale9Sprite* ommBG = static_cast<CCScale9Sprite*>(redashBG);
 		const GLubyte origOpacity = ommBG->getOpacity();
 
@@ -491,7 +554,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		ommBG->setOpacity(0);
 		ommBG->runAction(sequence);
 
-		return true;
+		this->schedule(schedule_selector(MyMenuLayer::allowReplay));
 	}
 };
 
@@ -499,6 +562,7 @@ $on_mod(Loaded) {
 	enabled = Mod::get()->getSettingValue<bool>("enabled");
 	classic = Mod::get()->getSettingValue<bool>("classic-play-button-anim");
 	reverse = Mod::get()->getSettingValue<bool>("reverse-side-menus");
+	rplyBtn = Mod::get()->getSettingValue<bool>("add-replay-button");
 	speed = Mod::get()->getSettingValue<double>("animation-speed");
 	delaySetting = Mod::get()->getSettingValue<double>("animation-delay");
 	addtlDuration = Mod::get()->getSettingValue<double>("animation-duration");
@@ -519,5 +583,8 @@ $on_mod(Loaded) {
 	});
 	listenForSettingChanges<bool>("reverse-side-menus", [](bool newReverse) {
 		reverse = newReverse;
+	});
+	listenForSettingChanges<bool>("add-replay-button", [](bool updatedReplayBtn) {
+		rplyBtn = updatedReplayBtn;
 	});
 }
