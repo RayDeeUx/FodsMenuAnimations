@@ -103,12 +103,12 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (!enabled) return true;
 
 		Loader::get()->queueInMainThread([this] {
-			(void) MyMenuLayer::animate();
+			MyMenuLayer::animate();
 		});
 
 		return true;
 	}
-	bool animate() {
+	void animate() {
 		CCNode* mainMenu = this->getChildByID("main-menu");
 		CCNode* bottomMenu = this->getChildByID("bottom-menu");
 		CCNode* profileMenu = this->getChildByID("profile-menu");
@@ -119,7 +119,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* moreGamesMenu = this->getChildByID("more-games-menu");
 		CCNode* playerUsername = this->getChildByID("player-username");
 
-		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return true;
+		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return;
 
 		// so here's a funny story about this code segment--
 		// one of the nodes i tried to apply an animation on
@@ -364,7 +364,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		CCNode* redashMenu = REDASH ? this->getChildByID("ninxout.redash/redash-menu") : nullptr;
 		CCNode* redashHide = REDASH ? this->getChildByID("ninxout.redash/hide-button-menu") : nullptr;
-		if (!REDASH || !redashMenu || !redashHide) return true;
+		if (!REDASH || !redashMenu || !redashHide) return;
 
 		CCNode* redashMain = redashMenu->getChildByID("ninxout.redash/main-menu"); // rotate + scale
 		CCNode* redashDailies = redashMenu->getChildByID("ninxout.redash/dailies-menu"); // scale
@@ -372,7 +372,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* redashBottom = redashMenu->getChildByID("ninxout.redash/bottom-menu"); // move from bottom
 		CCNode* redashTop = redashMenu->getChildByID("ninxout.redash/top-menu"); // scale lock, move rope
 
-		if (!redashMain || !redashDailies || !redashStats || !redashBottom || !redashTop) return true;
+		if (!redashMain || !redashDailies || !redashStats || !redashBottom || !redashTop) return;
 
 		if (const auto ommMain = redashMain->getChildren(); ommMain && redashMain->isVisible()) {
 			for (CCNode* node : CCArrayExt<CCNode*>(ommMain)) {
@@ -490,7 +490,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		i = 0;
 
 		CCNode* redashBG = this->getChildByID("ninxout.redash/bottom-menu-bg");
-		if (!redashBG) return true;
+		if (!redashBG) return;
 		CCScale9Sprite* ommBG = static_cast<CCScale9Sprite*>(redashBG);
 		const GLubyte origOpacity = ommBG->getOpacity();
 
