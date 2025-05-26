@@ -129,6 +129,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 		return true;
 	}
 	void animateWrapper(CCObject* sender) {
+		log::info("!enabled: {}", !enabled);
+		log::info("!alowRpy: {}", !alowRpy);
+		log::info("!rplyBtn: {}", !rplyBtn);
+		if (sender) log::info("sender->getTag(): {}", sender->getTag());
 		if (!enabled || !alowRpy || !rplyBtn || !sender || sender->getTag() != 5282025) return;
 		MyMenuLayer::animate();
 	}
