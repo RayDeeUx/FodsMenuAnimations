@@ -103,7 +103,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (!enabled) return true;
 
 		Loader::get()->queueInMainThread([this] {
-			MyMenuLayer::animate();
+			(void) MyMenuLayer::animate();
 		});
 
 		return true;
