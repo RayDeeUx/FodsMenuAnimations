@@ -41,7 +41,7 @@ using namespace geode::prelude;
 #define ANIM_DURTN CLAMP_FLOAT(addtlDuration, DURTN_MIN, DURTN_MAX)
 #define APPLY_ANIM_MODIFIERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DELAY)
 #define APPLY_ANIM_EXTENDERS(originalValue) ((originalValue / ANIM_SPEED) + ANIM_DURTN)
-#define REPLAY_COOLDOWN APPLY_ANIM_EXTENDERS(highestI) * 1.25f
+#define REPLAY_COOLDOWN APPLY_ANIM_EXTENDERS(highestI)
 #define UPDATE_I\
 	if (highestI < i) highestI = i;\
 	i = 0;
@@ -98,7 +98,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 		if (groundPos > 89.f) stopLooping = true;
 	}
 	void allowReplay(float dt) {
-		if (alowRpy || elapsedTime >= REPLAY_COOLDOWN) this->unschedule(schedule_selector(MyMenuLayer::allowReplay));
+		if (alowRpy || elapsedTime >= REPLAY_COOLDOWN) {
+			this->unschedule(schedule_selector(MyMenuLayer::allowReplay));
+			return;
+		}
 		elapsedTime += dt;
 		log::info("elapsedTime: {}", elapsedTime);
 		log::info("elapsedTime < REPLAY_COOLDOWN: {}", elapsedTime < REPLAY_COOLDOWN);
