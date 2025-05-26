@@ -108,7 +108,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		return true;
 	}
-	void animate() {
+	bool animate() {
 		CCNode* mainMenu = this->getChildByID("main-menu");
 		CCNode* bottomMenu = this->getChildByID("bottom-menu");
 		CCNode* profileMenu = this->getChildByID("profile-menu");
