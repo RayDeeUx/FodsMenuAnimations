@@ -104,7 +104,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		elapsedTime += dt;
 		if (elapsedTime < REPLAY_COOLDOWN) return;
-		if (CCNode* animateButton = this->getChildByID("animate-button"_spr)) {
+		if (CCNode* animateButton = this->getChildByIDRecursive("animate-button"_spr)) {
 			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setEnabled(true);
 			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({255, 255, 255});
 		}
