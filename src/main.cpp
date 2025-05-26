@@ -129,6 +129,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		return true;
 	}
 	void animateWrapper(CCObject* sender) {
+		log::info("highestI: {}", highestI);
+		log::info("APPLY_ANIM_EXTENDERS(highestI) * 1.25f: {}", APPLY_ANIM_EXTENDERS(highestI) * 1.25f);
 		log::info("!enabled: {}", !enabled);
 		log::info("!alowRpy: {}", !alowRpy);
 		log::info("!rplyBtn: {}", !rplyBtn);
