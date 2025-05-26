@@ -410,7 +410,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		CCNode* redashMenu = REDASH ? this->getChildByID("ninxout.redash/redash-menu") : nullptr;
 		CCNode* redashHide = REDASH ? this->getChildByID("ninxout.redash/hide-button-menu") : nullptr;
-		if (!REDASH || !redashMenu || !redashHide) return;
+		if (!REDASH || !redashMenu || !redashHide) {
+			if (rplyBtn) this->schedule(schedule_selector(MyMenuLayer::allowReplay));
+			return;
+		}
 
 		CCNode* redashMain = redashMenu->getChildByID("ninxout.redash/main-menu"); // rotate + scale
 		CCNode* redashDailies = redashMenu->getChildByID("ninxout.redash/dailies-menu"); // scale
