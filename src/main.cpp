@@ -103,8 +103,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 			return;
 		}
 		elapsedTime += dt;
-		log::info("elapsedTime: {}", elapsedTime);
-		log::info("elapsedTime < REPLAY_COOLDOWN: {}", elapsedTime < REPLAY_COOLDOWN);
 		if (elapsedTime < REPLAY_COOLDOWN) return;
 		elapsedTime = 0.f;
 		alowRpy = true;
@@ -144,12 +142,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 		return true;
 	}
 	void animateWrapper(CCObject* sender) {
-		log::info("highestI: {}", highestI);
-		log::info("REPLAY_COOLDOWN: {}", REPLAY_COOLDOWN);
-		log::info("!enabled: {}", !enabled);
-		log::info("!alowRpy: {}", !alowRpy);
-		log::info("!rplyBtn: {}", !rplyBtn);
-		if (sender) log::info("sender->getTag(): {}", sender->getTag());
 		if (!enabled || !alowRpy || !rplyBtn || !sender || sender->getTag() != 5282025) return;
 		MyMenuLayer::animate();
 	}

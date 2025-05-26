@@ -34,7 +34,7 @@
 		},
 		"add-replay-button": {
 			"name": "Add Replay Button",
-			"description": "Adds a button to replay the animation.",
+			"description": "Adds a button to replay the animation.\n\n## <cy>***__Yes, there's supposed to be a cooldown for the button. Don't act surprised over this intentional design choice.__***</c>",
 			"type": "bool",
 			"default": false
 		},
