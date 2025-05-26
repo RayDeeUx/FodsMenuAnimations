@@ -126,19 +126,17 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 		alowRpy = false;
 		elapsedTime = 0.f;
-		CCNode* bottomMenu = this->getChildByID("bottom-menu");
-		if (!enabled || !bottomMenu) return true;
+		CCNode* menu = REDASH ? this->getChildByID("right-side-menu") : this->getChildByID("bottom-menu");
+		if (!enabled || !menu) return true;
 		if (rplyBtn) {
 			CCSprite* animateSprite = CCSprite::createWithSpriteFrameName("edit_eAnimateBtn_001.png");
 			animateSprite->setScale(336.f / 162.f);
 			animateSprite->setID("animate-sprite"_spr);
 			CCMenuItemSpriteExtra* animateButton = CCMenuItemSpriteExtra::create(CircleButtonSprite::create(animateSprite), this, menu_selector(MyMenuLayer::animateWrapper));
 			animateButton->setID("animate-button"_spr);
-			animateButton->setColor({128, 128, 128});
-			animateButton->setEnabled(false);
 			animateButton->setTag(5282025);
-			bottomMenu->addChild(animateButton);
-			bottomMenu->updateLayout();
+			menu->addChild(animateButton);
+			menu->updateLayout();
 		}
 
 		Loader::get()->queueInMainThread([this] {
@@ -179,6 +177,11 @@ class $modify(MyMenuLayer, MenuLayer) {
 			const std::string& nodeID = yamm->getSettingValue<std::string>("pulseNodeID");
 			if (!modID.empty() && Loader::get()->isModLoaded(modID)) nodeChosenByYAMM = fmt::format("{}/{}", modID, nodeID);
 			else if (!nodeID.empty()) nodeChosenByYAMM = nodeID;
+		}
+
+		if (CCNode* animateButton = this->getChildByIDRecursive("animate-button"_spr)) {
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setEnabled(false);
+			static_cast<CCMenuItemSpriteExtra*>(animateButton)->setColor({128, 128, 128});
 		}
 
 		int i = 0;
