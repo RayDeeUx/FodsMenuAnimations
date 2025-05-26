@@ -538,7 +538,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		ommBG->runAction(sequence);
 
 		if (rplyBtn) {
-			this->schedule(schedule_selector(MyMenuLayer::allowReplay), APPLY_ANIM_EXTENDERS(highestI) * 1.25f);
+			this->scheduleOnce(schedule_selector(MyMenuLayer::allowReplay), APPLY_ANIM_EXTENDERS(highestI) * 1.25f);
 		}
 	}
 };
