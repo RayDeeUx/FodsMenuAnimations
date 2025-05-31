@@ -1,5 +1,5 @@
 # HJfod's Menu Animations Reborn Changelog
-## v1.1.1
+## v1.2.0
 - Added an animation replay button.
 ## v1.1.0
 - Added `Animation Speed`, `Animation Delay`, and `Additional Animation Duration` for those who want to adjust the animation's properties.

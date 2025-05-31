@@ -112,16 +112,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 		alowRpy = true;
 	}
 	bool init() {
-		/*
-		If you need more than 3 levels of indentation,
-		you're screwed anyway, and should fix your program.
-		*/
-		// i'm usually in the same camp with linus torvalds when
-		// it comes to levels of indentation, but i had to break
-		// his rule just this once for reasons you'll see shortly.
-		// (spoiler: cocos2d nullptr checks are really finicky)
-		// please forgive me for my flagrant transgression.
-		// --raydeeux
 		if (!MenuLayer::init()) return false;
 
 		alowRpy = false;
@@ -149,6 +139,16 @@ class $modify(MyMenuLayer, MenuLayer) {
 		MyMenuLayer::animate();
 	}
 	void animate() {
+		/*
+		If you need more than 3 levels of indentation,
+		you're screwed anyway, and should fix your program.
+		*/
+		// i'm usually in the same camp with linus torvalds when
+		// it comes to levels of indentation, but i had to break
+		// his rule just this once for reasons you'll see shortly.
+		// (spoiler: cocos2d nullptr checks are really finicky)
+		// please forgive me for my flagrant transgression.
+		// --raydeeux
 		if (!enabled) return;
 		alowRpy = false;
 
