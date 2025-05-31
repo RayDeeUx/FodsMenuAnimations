@@ -134,8 +134,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		return true;
 	}
 	void animateWrapper(CCObject* sender) {
-		if (!enabled || !alowRpy || !rplyBtn || !sender || sender->getTag() != 5282025) return;
-		if (elapsedTime < REPLAY_COOLDOWN) return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
+		if (!enabled || !sender || sender->getTag() != 5282025) return;
+		if (elapsedTime < REPLAY_COOLDOWN && (!alowRpy || !rplyBtn)) return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
 		MyMenuLayer::animate();
 	}
 	void animate() {
