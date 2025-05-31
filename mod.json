@@ -8,7 +8,7 @@
 	},
 	"id": "raydeeux_hjfod.fodsmenuanimations",
 	"name": "HJfod's Menu Animations Reborn",
-	"version": "v1.2.0",
+	"version": "v1.1.0",
 	"developers": ["RayDeeUx", "HJfod"],
 	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
 	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",
@@ -110,6 +110,12 @@
 				"big-arrow-step": 1,
 				"slider-step": 0.01
 			}
+		},
+		"queue-in-main-thread": {
+			"name": "Queue Animation in Main Thread",
+			"description": "<cy>[Advanced Option]</c> Queues the animation for one frame.\n\n## <cy>***__BUTTONS ON THE MAIN MENU WILL FLICKER FOR A FRAME. DON'T ACT SURPRISED ABOUT THIS.__***</c>",
+			"type": "bool",
+			"default": false
 		}
 	},
 	"issues": {
