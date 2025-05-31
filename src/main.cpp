@@ -51,6 +51,7 @@ bool classic = false;
 bool reverse = false;
 bool rplyBtn = false;
 bool alowRpy = false;
+bool queuing = false;
 
 float speed = 1.0f;
 float delaySetting = 0.0f;
@@ -129,7 +130,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 			menu->updateLayout();
 		}
 
-		MyMenuLayer::animate();
+		if (!queuing) MyMenuLayer::animate();
+		else Loader::get()->queueInMainThread([this] { MyMenuLayer::animate(); });
 
 		return true;
 	}
@@ -560,6 +562,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 $on_mod(Loaded) {
 	enabled = Mod::get()->getSettingValue<bool>("enabled");
 	classic = Mod::get()->getSettingValue<bool>("classic-play-button-anim");
+	queuing = Mod::get()->getSettingValue<bool>("queue-in-main-thread");
 	reverse = Mod::get()->getSettingValue<bool>("reverse-side-menus");
 	rplyBtn = Mod::get()->getSettingValue<bool>("add-replay-button");
 	speed = Mod::get()->getSettingValue<double>("animation-speed");
@@ -585,5 +588,8 @@ $on_mod(Loaded) {
 	});
 	listenForSettingChanges<bool>("add-replay-button", [](bool updatedReplayBtn) {
 		rplyBtn = updatedReplayBtn;
+	});
+	listenForSettingChanges<bool>("queue-in-main-thread", [](bool newQueuing) {
+		queuing = newQueuing;
 	});
 }
