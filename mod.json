@@ -8,7 +8,7 @@
 	},
 	"id": "raydeeux_hjfod.fodsmenuanimations",
 	"name": "HJfod's Menu Animations Reborn",
-	"version": "v1.1.0",
+	"version": "v1.2.0",
 	"developers": ["RayDeeUx", "HJfod"],
 	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
 	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",
@@ -34,7 +34,7 @@
 		},
 		"add-replay-button": {
 			"name": "Add Replay Button",
-			"description": "Adds a button to replay the animation.\n\n## <cy>***__Yes, there's supposed to be a cooldown for the button. Don't act surprised over this intentional design choice.__***</c>",
+			"description": "Adds a button to replay the animation.\n\n## <c-ff0000>***__Yes, there's supposed to be a cooldown for the button. Don't act surprised over this intentional design choice.__***</c>",
 			"type": "bool",
 			"default": false
 		},
@@ -113,7 +113,7 @@
 		},
 		"queue-in-main-thread": {
 			"name": "Queue Animation in Main Thread",
-			"description": "<cy>[Advanced Option]</c> Queues the animation for one frame.\n\n## <cy>***__BUTTONS ON THE MAIN MENU WILL FLICKER FOR A FRAME. DON'T ACT SURPRISED ABOUT THIS.__***</c>",
+			"description": "<cy>[Advanced Option]</c> Queues the animation for one frame.\n\n## <c-ff0000>***__BUTTONS ON THE MAIN MENU MAY FLICKER FOR A FRAME IF YOU HAVE A LOT OF MODS; DON'T ACT SURPRISED.__***</c>",
 			"type": "bool",
 			"default": false
 		}
