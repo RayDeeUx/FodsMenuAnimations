@@ -20,6 +20,17 @@
 			"type": "bool",
 			"default": true
 		},
+		"animation-mode": {
+			"name": "Animation Mode (Always, Once per Game Launch, Only on Button)",
+			"description": "- Always: Always play the animation each time when entering the main menu.\n- Once per Game Launch: Only plays the animation once per game launch.\n- Only on Button: The animation only plays if pressing the \"Replay Button\" (the button with the \"Animate\" trigger icon).",
+			"type": "string",
+			"default": "Always",
+			"one-of": [
+				"Always",
+				"Once per Game Launch",
+				"Only on Button"
+			]
+		},
 		"classic-play-button-anim": {
 			"name": "Classic Play Button Animation",
 			"description": "Use the original animation for the Play button (that big button at dead center of the screen).",

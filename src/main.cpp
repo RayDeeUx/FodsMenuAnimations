@@ -57,12 +57,16 @@ float speed = 1.0f;
 float delaySetting = 0.0f;
 float addtlDuration = 0.0f;
 
+std::string animMode = "Always";
+
 int highestI = 0;
 
 float elapsedTime = 0.f;
 
 bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
+
+bool playedAlready = false;
 
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
@@ -93,7 +97,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		for (CCNode* node : CCArrayExt<CCNode*>(m_menuGameLayer->getChildren())) {
 			if (node == m_menuGameLayer->m_groundLayer || node == m_menuGameLayer->m_backgroundSprite) continue;
 			node->setVisible(false);
-			if (node == player->m_waveTrail || node == player->m_regularTrail || node == player->m_shipStreak) continue;
+			if (player && (node == player->m_waveTrail || node == player->m_regularTrail || node == player->m_shipStreak)) continue;
 			if (groundPos > 89.f) node->setVisible(true);
 		}
 		if (groundPos > 89.f) stopLooping = true;
@@ -130,14 +134,18 @@ class $modify(MyMenuLayer, MenuLayer) {
 			menu->updateLayout();
 		}
 
+		if (animMode == "Only on Button" || (playedAlready && animMode == "Once per Game Launch")) return true;
+
 		if (!queuing) MyMenuLayer::animate();
 		else Loader::get()->queueInMainThread([this] { MyMenuLayer::animate(); });
+
+		if (animMode == "Once per Game Launch" && !playedAlready) playedAlready = true;
 
 		return true;
 	}
 	void animateWrapper(CCObject* sender) {
 		if (!enabled || !sender || !rplyBtn || sender->getTag() != 5282025) return;
-		if (!alowRpy) return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
+		if (!alowRpy && animMode == "Always") return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
 		MyMenuLayer::animate();
 	}
 	void animate() {
@@ -568,8 +576,13 @@ $on_mod(Loaded) {
 	speed = Mod::get()->getSettingValue<double>("animation-speed");
 	delaySetting = Mod::get()->getSettingValue<double>("animation-delay");
 	addtlDuration = Mod::get()->getSettingValue<double>("animation-duration");
+	animMode = Mod::get()->getSettingValue<std::string>("animation-mode");
 	listenForSettingChanges<bool>("enabled", [](bool updatedEnabledSetting) {
 		enabled = updatedEnabledSetting;
+	});
+	listenForSettingChanges<std::string>("animation-mode", [](std::string updatedAnimMode) {
+		animMode = updatedAnimMode;
+		if (updatedAnimMode == "Always") playedAlready = false;
 	});
 	listenForSettingChanges<double>("animation-speed", [](double speedUpdated) {
 		speed = speedUpdated;
