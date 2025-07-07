@@ -12,6 +12,7 @@
 // https://raw.githubusercontent.com/HJfod/cool-menu-animation/v1.1/main.cpp
 // --raydeeux
 
+#include <Geode/modify/LoadingLayer.hpp>
 #include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
@@ -67,6 +68,14 @@ bool stopLooping = false; // m_fields for a singlefile mod is silly --raydeeux
 bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
 
 bool playedAlready = false;
+
+class $modify(MyLoadingLayer, LoadingLayer) {
+	bool init(bool fromReload) {
+		if (!LoadingLayer::init(fromReload)) return false;
+		if (animMode == "Only From Loading Screen") playedAlready = false;
+		return true;
+	}
+};
 
 class $modify(MyMenuLayer, MenuLayer) {
 	static void onModify(auto& self) {
@@ -134,12 +143,12 @@ class $modify(MyMenuLayer, MenuLayer) {
 			menu->updateLayout();
 		}
 
-		if (animMode == "Only on Button" || (playedAlready && animMode == "Once per Game Launch")) return true;
+		if (animMode == "Only on Button" || (playedAlready && (animMode == "Once per Game Launch" || animMode == "Only From Loading Screen"))) return true;
 
 		if (!queuing) MyMenuLayer::animate();
 		else Loader::get()->queueInMainThread([this] { MyMenuLayer::animate(); });
 
-		if (animMode == "Once per Game Launch" && !playedAlready) playedAlready = true;
+		if ((animMode == "Once per Game Launch" || animMode == "Only From Loading Screen") && !playedAlready) playedAlready = true;
 
 		return true;
 	}

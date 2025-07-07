@@ -22,11 +22,12 @@
 		},
 		"animation-mode": {
 			"name": "Animation Mode (Always, Once per Game Launch, Only on Button)",
-			"description": "- Always: Always play the animation each time when entering the main menu.\n- Once per Game Launch: Only plays the animation once per game launch.\n- Only on Button: The animation only plays if pressing the \"Replay Button\" (the button with the \"Animate\" trigger icon).",
+			"description": "- Always: Always play the animation each time when entering the main menu.\n- Only From Loading Screen: Only plays the animation from the Loading Screen (whether from game launch or from reloading graphics).\n- Once per Game Launch: Only plays the animation once per game launch.\n- Only on Button: The animation only plays if pressing the \"Replay Button\" (the button with the \"Animate\" trigger icon).",
 			"type": "string",
 			"default": "Always",
 			"one-of": [
 				"Always",
+				"Only From Loading Screen",
 				"Once per Game Launch",
 				"Only on Button"
 			]
