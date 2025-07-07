@@ -1,4 +1,8 @@
 # HJfod's Menu Animations Reborn Changelog
+## v1.2.1
+- Added `Animation Mode` to adjust when the animation should play. (Requested by [catgirldev](https://github.com/AnhNguyenlost13))
+  - Default setting is `Always` to preserve past mod behavior.
+  - Other options include `Only From Loading Screen`, `Once per Game Launch`, and `Only on Button`.
 ## v1.2.0
 - Added an animation replay button.
 - Added an option to queue the animation for one frame, because some folks needed that for some reason.
