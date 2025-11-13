@@ -1,4 +1,6 @@
 # HJfod's Menu Animations Reborn Changelog
+## v1.2.2
+- Refactor a few things here and there for slightly more robust compatability. (I hope.)
 ## v1.2.1
 - Added `Animation Mode` to adjust when the animation should play. (Requested by [catgirldev](https://github.com/AnhNguyenlost13))
   - Default setting is `Always` to preserve past mod behavior.
