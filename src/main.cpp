@@ -56,6 +56,7 @@ bool reverse = false;
 bool rplyBtn = false;
 bool alowRpy = false;
 bool queuing = false;
+bool mmpShwn = false;
 
 float speed = 1.0f;
 float delaySetting = 0.0f;
@@ -146,33 +147,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		elapsedTime = 0.f;
 		alowRpy = true;
 	}
-	static cocos2d::CCScene* scene(bool p0) {
-		CCScene* scene = MenuLayer::scene(p0);
-		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
-			FLAlertLayer* alert = FLAlertLayer::create("Uh oh!", "<cy>Another menu animations mod is active! The specific menu animations mod you have active right now is notorious for misaligning buttons across multiple aspect ratios. As a precaution, those animations have been stopped. Please consider disabling it through its mod settings.</c>", "I Understand");
-			scene->addChild(alert);
-		}
-		return scene;
-	}
-	bool init() {
-		if (!MenuLayer::init()) return false;
-
-		alowRpy = false;
-		elapsedTime = 0.f;
-		CCNode* menu = REDASH ? this->getChildByID("right-side-menu") : this->getChildByID("bottom-menu");
-		if (!enabled || !menu) return true;
-		
-		if (rplyBtn) {
-			CCSprite* animateSprite = CCSprite::createWithSpriteFrameName("edit_eAnimateBtn_001.png");
-			animateSprite->setScale(336.f / 162.f);
-			animateSprite->setID("animate-sprite"_spr);
-			CCMenuItemSpriteExtra* animateButton = CCMenuItemSpriteExtra::create(CircleButtonSprite::create(animateSprite), this, menu_selector(MyMenuLayer::animateWrapper));
-			animateButton->setID("animate-button"_spr);
-			animateButton->setTag(5282025);
-			menu->addChild(animateButton);
-			menu->updateLayout();
-		}
-
+	void restorePositions() {
 		if (JASMINE_WHYTHEFUCK_LOADED) {
 			CCDirector* director = CCDirector::get();
 			const CCSize winSize = director->getWinSize();
@@ -234,6 +209,37 @@ class $modify(MyMenuLayer, MenuLayer) {
 				profileMenu->setPositionY(profileMenu->getPositionY() - 10.f);
 			}
 		}
+	}
+	static cocos2d::CCScene* scene(bool p0) {
+		CCScene* scene = MenuLayer::scene(p0);
+		if (!enabled || mmpShwn) return scene;
+		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
+			FLAlertLayer* alert = FLAlertLayer::create("Uh oh!", "<c_>Another menu animations mod is active!</c>\n<cy>The specific menu animations mod you have active is notorious for misaligning button placements on different aspect ratios.</c> <co>As a precaution, those animations have been stopped.</c> <cy>Please consider disabling it through its mod settings.</c>\n\n<cg>You will only see this warning once.</c>", "I Understand");
+			scene->addChild(alert);
+			mmpShwn = true;
+		}
+		return scene;
+	}
+	bool init() {
+		if (!MenuLayer::init()) return false;
+
+		alowRpy = false;
+		elapsedTime = 0.f;
+		CCNode* menu = REDASH ? this->getChildByID("right-side-menu") : this->getChildByID("bottom-menu");
+		if (!enabled || !menu) return true;
+		
+		if (rplyBtn) {
+			CCSprite* animateSprite = CCSprite::createWithSpriteFrameName("edit_eAnimateBtn_001.png");
+			animateSprite->setScale(336.f / 162.f);
+			animateSprite->setID("animate-sprite"_spr);
+			CCMenuItemSpriteExtra* animateButton = CCMenuItemSpriteExtra::create(CircleButtonSprite::create(animateSprite), this, menu_selector(MyMenuLayer::animateWrapper));
+			animateButton->setID("animate-button"_spr);
+			animateButton->setTag(5282025);
+			menu->addChild(animateButton);
+			menu->updateLayout();
+		}
+
+		MyMenuLayer::restorePositions();
 
 		if (animMode == "Only on Button" || (playedAlready && (animMode == "Once per Game Launch" || animMode == "Only From Loading Screen"))) return true;
 
@@ -246,8 +252,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 	}
 	void animateWrapper(CCObject* sender) {
 		if (!enabled || !sender || !rplyBtn || sender->getTag() != 5282025) return;
-		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>ANOTHER MENU ANIMATION MOD IS STILL ACTIVE, FOR CRYING OUT LOUD!</c>", "I Understand")->show();
 		if (!alowRpy && animMode == "Always") return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
+		MyMenuLayer::restorePositions();
 		MyMenuLayer::animate();
 	}
 	void animate() {
