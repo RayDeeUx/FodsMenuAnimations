@@ -1,5 +1,5 @@
 {
-	"geode": "4.4.0",
+	"geode": "4.7.0",
 	"gd": {
 		"win": "2.2074",
 		"mac": "2.2074",
@@ -8,7 +8,7 @@
 	},
 	"id": "raydeeux_hjfod.fodsmenuanimations",
 	"name": "HJfod's Menu Animations Reborn",
-	"version": "v1.2.1",
+	"version": "v1.2.2",
 	"developers": ["RayDeeUx", "HJfod"],
 	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
 	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",

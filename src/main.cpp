@@ -20,13 +20,16 @@ using namespace geode::prelude;
 #define REDASH_ID "ninxout.redash"
 #define YAMM_ID "raydeeux.yetanotherqolmod"
 #define VANILLA_PAGES_ID "alphalaneous.vanilla_pages"
+#define JASMINE_WHYTHEFUCK_ID "bluescratch.main_menu_plus"
 #define GET_MOD Loader::get()->getLoadedMod
 #define YAMM Loader::get()->isModLoaded(YAMM_ID)
 #define REDASH Loader::get()->isModLoaded(REDASH_ID)
 #define VANILLA_PAGES_LOADED Loader::get()->isModLoaded(VANILLA_PAGES_ID)
+#define JASMINE_WHYTHEFUCK_LOADED Loader::get()->isModLoaded(JASMINE_WHYTHEFUCK_ID)
 #define VANILLA_PAGES GET_MOD(VANILLA_PAGES_ID)
 #define VANILLA_PAGES_MENULAYER_RIGHT GET_MOD(VANILLA_PAGES_ID)->getSettingValue<bool>("menulayer-right-menu")
 #define VANILLA_PAGES_MENULAYER_BOTTOM GET_MOD(VANILLA_PAGES_ID)->getSettingValue<bool>("menulayer-bottom-menu")
+#define JASMINE_WHYTHEFUCK_ENABLED GET_MOD(JASMINE_WHYTHEFUCK_ID)->getSettingValue<bool>("enable-mod")
 #define GET_YAMM GET_MOD(YAMM_ID)
 #define IS_AFFECTED_BY_YAMM(node) !node->getID().empty() && node->getID() == nodeChosenByYAMM
 
@@ -69,6 +72,22 @@ bool jumpedAlready = false; // m_fields for a singlefile mod is silly --raydeeux
 
 bool playedAlready = false;
 
+/*
+geode::Hook* theHook = nullptr;
+
+$on_mod(Loaded) {
+	if (auto jasmineWhyTheFUCK = Loader::get()->getInstalledMod(JASMINE_WHYTHEFUCK_ID)) {
+		if (jasmineWhyTheFUCK->isEnabled()) {
+			if (theHook) theHook->setPriority(99999998);
+		} else {
+			new EventListener(+[](ModStateEvent*) {
+				if (theHook) theHook->setPriority(99999998);
+			}, ModStateFilter(jasmineWhyTheFUCK, ModEventType::Loaded));
+		}
+	}
+}
+*/
+
 class $modify(MyLoadingLayer, LoadingLayer) {
 	bool init(bool fromReload) {
 		if (!LoadingLayer::init(fromReload)) return false;
@@ -83,6 +102,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 		else if (REDASH) (void) self.setHookPriorityAfterPost("MenuLayer::init", REDASH_ID);
 		else if (VANILLA_PAGES_LOADED) (void) self.setHookPriorityAfterPost("MenuLayer::init", VANILLA_PAGES_ID);
 		else (void) self.setHookPriority("MenuLayer::init", -3998);
+		// theHook = self.getHook("MenuLayer::init").unwrapOr(nullptr);
+		// log::info("theHook == nullptr: {}", theHook == nullptr);
 	}
 	void determinePlayerVisibility(float dt) {
 		if (!enabled) return;
@@ -91,9 +112,9 @@ class $modify(MyMenuLayer, MenuLayer) {
 		PlayerObject* player = m_menuGameLayer->m_playerObject;
 		if (player && (player->getPositionX() > 0.f || player->getRealPosition().x > 0.f)) {
 			if (stopLooping && player->m_isDart && player->m_waveTrail) player->m_waveTrail->setVisible(true);
-			else if (stopLooping && !jumpedAlready && player->m_isRobot) {
+			else if (stopLooping && !jumpedAlready && player->m_isRobot && player->m_robotSprite) {
 				// in case any whiny kids start yelling at me for why the robot isnt jumping --raydeeux
-				m_menuGameLayer->tryJump(.1f);
+				player->m_robotSprite->runAnimation("run");
 				jumpedAlready = true;
 			}
 			return;
@@ -125,6 +146,16 @@ class $modify(MyMenuLayer, MenuLayer) {
 		elapsedTime = 0.f;
 		alowRpy = true;
 	}
+	/*
+	static cocos2d::CCScene* scene(bool p0) {
+		CCScene* scene = MenuLayer::scene(p0);
+		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
+			FLAlertLayer* alert = FLAlertLayer::create("Uh oh!", "<cy>Another menu animations mod is active! Please consider disabling it through its mod settings.</c>", "I Understand");
+			scene->addChild(alert);
+		}
+		return scene;
+	}
+	*/
 	bool init() {
 		if (!MenuLayer::init()) return false;
 
@@ -132,6 +163,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		elapsedTime = 0.f;
 		CCNode* menu = REDASH ? this->getChildByID("right-side-menu") : this->getChildByID("bottom-menu");
 		if (!enabled || !menu) return true;
+		
 		if (rplyBtn) {
 			CCSprite* animateSprite = CCSprite::createWithSpriteFrameName("edit_eAnimateBtn_001.png");
 			animateSprite->setScale(336.f / 162.f);
@@ -141,6 +173,63 @@ class $modify(MyMenuLayer, MenuLayer) {
 			animateButton->setTag(5282025);
 			menu->addChild(animateButton);
 			menu->updateLayout();
+		}
+
+		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
+			CCDirector* director = CCDirector::get();
+			const CCSize winSize = director->getWinSize();
+
+			CCNode* mainMenu = this->getChildByID("main-menu");
+			CCNode* bottomMenu = this->getChildByID("bottom-menu");
+			CCNode* profileMenu = this->getChildByID("profile-menu");
+			CCNode* rightSideMenu = this->getChildByID("right-side-menu");
+			CCNode* topRightMenu = this->getChildByID("top-right-menu");
+			CCNode* sideMenu = this->getChildByID("side-menu");
+			CCNode* socialMediaMenu = this->getChildByID("social-media-menu");
+			CCNode* moreGamesMenu = this->getChildByID("more-games-menu");
+			CCNode* playerUsername = this->getChildByID("player-username");
+			CCNode* title = this->getChildByIDRecursive("main-title");
+
+			// shoutout to capeling for having reversed all of these positions before! :D
+			title->stopAllActions();
+			title->setPosition(ccp(winSize.width / 2.f, director->getScreenTop() - 50.f));
+
+			mainMenu->stopAllActions();
+			mainMenu->setPosition(winSize / 2 + ccp(0.f, 10.f));
+
+			bottomMenu->stopAllActions();
+			bottomMenu->setPosition(ccp(winSize.width / 2, 45.f));
+
+			rightSideMenu->stopAllActions();
+			rightSideMenu->setPosition(director->getScreenRight() - 40.f, winSize.height / 2 + 20.f);
+
+			socialMediaMenu->stopAllActions();
+			socialMediaMenu->setPosition(ccp(13.f, 13.f));
+
+			moreGamesMenu->stopAllActions();
+			moreGamesMenu->setPosition(ccp(director->getScreenRight() - 43.f, 45.f));
+			moreGamesMenu->setPositionX((moreGamesMenu->getPositionX() - 100.f / 2) + (moreGamesMenu->getChildByID("more-games-button")->getScaledContentSize().width / 2));
+
+			profileMenu->stopAllActions();
+			profileMenu->setPositionY(105);
+			profileMenu->setPositionX(45);
+
+			playerUsername->stopAllActions();
+			playerUsername->setPosition(profileMenu->getPosition());
+			playerUsername->setPositionX(playerUsername->getPositionX() + 2.f);
+			playerUsername->setPositionY(playerUsername->getPositionY() + 36.f);
+
+			profileMenu->setPositionX((profileMenu->getPositionX() + 150.f / 2) - (profileMenu->getChildByID("profile-button")->getScaledContentSize().width / 2));
+
+			log::info("mainMenu->getPosition(): {}", mainMenu->getPosition());
+			log::info("bottomMenu->getPosition(): {}", bottomMenu->getPosition());
+			log::info("profileMenu->getPosition(): {}", profileMenu->getPosition());
+			log::info("rightSideMenu->getPosition(): {}", rightSideMenu->getPosition());
+			log::info("topRightMenu->getPosition(): {}", topRightMenu->getPosition());
+			log::info("sideMenu->getPosition(): {}", sideMenu->getPosition());
+			log::info("socialMediaMenu->getPosition(): {}", socialMediaMenu->getPosition());
+			log::info("moreGamesMenu->getPosition(): {}", moreGamesMenu->getPosition());
+			log::info("playerUsername->getPosition(): {}", playerUsername->getPosition());
 		}
 
 		if (animMode == "Only on Button" || (playedAlready && (animMode == "Once per Game Launch" || animMode == "Only From Loading Screen"))) return true;
@@ -154,6 +243,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 	}
 	void animateWrapper(CCObject* sender) {
 		if (!enabled || !sender || !rplyBtn || sender->getTag() != 5282025) return;
+		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>ANOTHER MENU ANIMATION MOD IS STILL ACTIVE, FOR CRYING OUT LOUD!</c>", "I Understand")->show();
 		if (!alowRpy && animMode == "Always") return FLAlertLayer::create("WATCH IT, BUDDY!", "<c_>I'M STILL ON COOLDOWN, FOR CRYING OUT LOUD!</c>\n<c_>LEAVE ME ALONE!</c>", "Contemplate Life")->show();
 		MyMenuLayer::animate();
 	}
@@ -217,6 +307,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 					CCSpawn* whyDidFodUseCCSpawnAgain = CCSpawn::create(eoScale, eoRotate, nullptr);
 					CCSequence* scaleAndRotateSequencePlayButton = CCSequence::create(playButtonDelay, whyDidFodUseCCSpawnAgain, nullptr);
 
+					node->stopAllActions();
 					node->runAction(scaleAndRotateSequencePlayButton);
 				} else {
 					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((.25f * static_cast<float>(i)) + .5f)));
@@ -225,6 +316,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 					CCSpawn* whyDidFodUseCCSpawn = CCSpawn::create(eboScale, eboRotate, nullptr);
 					CCSequence* scaleAndRotateSequence = CCSequence::create(delay, whyDidFodUseCCSpawn, nullptr);
 
+					node->stopAllActions();
 					node->runAction(scaleAndRotateSequence);
 				}
 
@@ -239,6 +331,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			CCSequence* titleSequence = CCSequence::create(delay, eboScale, nullptr);
 
 			title->setScale(0.f);
+			title->stopAllActions();
 			title->runAction(titleSequence);
 		}
 
@@ -248,6 +341,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCEaseElasticOut* eeoScale = CCEaseElasticOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(1.f), 1.f));
 				CCSequence* usernameCharSequence = CCSequence::create(delay, eeoScale, nullptr);
 				sprite->setScale(0.f);
+				sprite->stopAllActions();
 				sprite->runAction(usernameCharSequence);
 			}
 		}
@@ -267,6 +361,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCSequence* groundSequence = CCSequence::create(delay, eeoMove, nullptr);
 
 				node->setPositionY(0.f);
+				node->stopAllActions();
 				node->runAction(groundSequence);
 			}
 			this->schedule(schedule_selector(MyMenuLayer::determinePlayerVisibility));
@@ -279,6 +374,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 100.f }));
 
 				theMenuToScaleFromZero->setPositionY(nodeOrigYPos - 100.f);
+				theMenuToScaleFromZero->stopAllActions();
 				theMenuToScaleFromZero->runAction(CCSequence::create(delay, eeoMove, nullptr));
 			} else if (auto tMTSFZChildren = theMenuToScaleFromZero->getChildren(); tMTSFZChildren && theMenuToScaleFromZero->isVisible()) {
 				if (REDASH) tMTSFZChildren->reverseObjects();
@@ -294,6 +390,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 					CCEaseBackInOut* ebioScale = CCEaseBackInOut::create(CCScaleTo::create(APPLY_ANIM_EXTENDERS(.75f), nodeOriginalScale));
 
 					node->setScale(0.f);
+					node->stopAllActions();
 					node->runAction(CCSequence::create(delayOne, eeoScale, nullptr));
 					node->runAction(CCSequence::create(delayTwo, eiScale, ebioScale, nullptr));
 
@@ -313,6 +410,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 100.f, 0.f }));
 
 				node->setPositionX(nodeOrigXPos - 100.f);
+				node->stopAllActions();
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
 				i++;
@@ -329,6 +427,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -100.f }));
 
 				node->setPositionY(nodeOrigXPos + 100.f);
+				node->stopAllActions();
 				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
 				i++;
@@ -343,6 +442,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { -100.f, 0.f }));
 
 				theMenuToSlideFromRight->setPositionX(nodeOrigXPos + 100.f);
+				theMenuToSlideFromRight->stopAllActions();
 				theMenuToSlideFromRight->runAction(CCSequence::create(delay, eeoMove, nullptr));
 			} else if (auto rightSideMenuChildren = theMenuToSlideFromRight->getChildren(); rightSideMenuChildren && theMenuToSlideFromRight->isVisible()) {
 				if (reverse) rightSideMenuChildren->reverseObjects();
@@ -354,6 +454,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { -100.f, 0.f }));
 
 					node->setPositionX(nodeOrigXPos + 100.f);
+					node->stopAllActions();
 					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
 
 					i++;
@@ -370,6 +471,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 				CCSequence* sequence = CCSequence::create(delay, eboScale, nullptr);
 
 				node->setScale(0.f);
+				node->stopAllActions();
 				node->runAction(sequence);
 
 				i++;
@@ -386,6 +488,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 					CCSequence* sequence = CCSequence::create(delay, eeoScale, nullptr);
 
 					node->setScale(0.f);
+					node->stopAllActions();
 					node->runAction(sequence);
 
 					i++;
