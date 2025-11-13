@@ -220,6 +220,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			playerUsername->setPositionY(playerUsername->getPositionY() + 36.f);
 
 			profileMenu->setPositionX((profileMenu->getPositionX() + 150.f / 2) - (profileMenu->getChildByID("profile-button")->getScaledContentSize().width / 2));
+			profileMenu->setPositionX(profileMenu->getPositionX() - 1.5f);
 
 			log::info("mainMenu->getPosition(): {}", mainMenu->getPosition());
 			log::info("bottomMenu->getPosition(): {}", bottomMenu->getPosition());
