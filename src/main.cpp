@@ -175,7 +175,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 			menu->updateLayout();
 		}
 
-		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
+		if (JASMINE_WHYTHEFUCK_LOADED) {
 			CCDirector* director = CCDirector::get();
 			const CCSize winSize = director->getWinSize();
 
@@ -190,7 +190,8 @@ class $modify(MyMenuLayer, MenuLayer) {
 			CCNode* playerUsername = this->getChildByID("player-username");
 			CCNode* title = this->getChildByIDRecursive("main-title");
 
-			// shoutout to capeling for having reversed all of these positions before! :D
+			// shoutout to capeling for having reversed all of these positions before!  :D
+			// portions were taken from node ID assignment/placement logic from geode also
 			title->stopAllActions();
 			title->setPosition(ccp(winSize.width / 2.f, director->getScreenTop() - 50.f));
 
@@ -198,10 +199,10 @@ class $modify(MyMenuLayer, MenuLayer) {
 			mainMenu->setPosition(winSize / 2 + ccp(0.f, 10.f));
 
 			bottomMenu->stopAllActions();
-			bottomMenu->setPosition(ccp(winSize.width / 2, 45.f));
+			if (!REDASH) bottomMenu->setPosition(ccp(winSize.width / 2, 45.f));
 
 			rightSideMenu->stopAllActions();
-			rightSideMenu->setPosition(director->getScreenRight() - 40.f, winSize.height / 2 + 20.f);
+			if (!REDASH) rightSideMenu->setPosition(director->getScreenRight() - 40.f, winSize.height / 2 + 20.f);
 
 			socialMediaMenu->stopAllActions();
 			socialMediaMenu->setPosition(ccp(13.f, 13.f));
@@ -211,16 +212,29 @@ class $modify(MyMenuLayer, MenuLayer) {
 			moreGamesMenu->setPositionX((moreGamesMenu->getPositionX() - 100.f / 2) + (moreGamesMenu->getChildByID("more-games-button")->getScaledContentSize().width / 2));
 
 			profileMenu->stopAllActions();
-			profileMenu->setPositionY(105);
-			profileMenu->setPositionX(45);
-
 			playerUsername->stopAllActions();
-			playerUsername->setPosition(profileMenu->getPosition());
-			playerUsername->setPositionX(playerUsername->getPositionX() + 2.f);
-			playerUsername->setPositionY(playerUsername->getPositionY() + 36.f);
 
-			profileMenu->setPositionX((profileMenu->getPositionX() + 150.f / 2) - (profileMenu->getChildByID("profile-button")->getScaledContentSize().width / 2));
-			profileMenu->setPositionX(profileMenu->getPositionX() - 1.5f);
+			if (!REDASH) {
+				profileMenu->setPosition(45, 105);
+
+				playerUsername->setPosition(profileMenu->getPosition());
+				playerUsername->setPositionX(playerUsername->getPositionX() + 2.f);
+				playerUsername->setPositionY(playerUsername->getPositionY() + 36.f);
+
+				profileMenu->setPositionX((profileMenu->getPositionX() + 150.f / 2) - (profileMenu->getChildByID("profile-button")->getScaledContentSize().width / 2));
+				profileMenu->setPositionX(profileMenu->getPositionX() - 1.5f);
+			} else {
+				// original code by weebify + ninXout
+				playerUsername->setPositionX(bottomMenu->getPositionX());
+				playerUsername->setPositionY(bottomMenu->getPositionY() - bottomMenu->getScaledContentHeight()/2 - playerUsername->getScaledContentHeight()/2 + 2.9f);
+
+				profileMenu->setPositionX(playerUsername->getPositionX() + profileMenu->getScaledContentWidth()/2 - 20.625f);
+				profileMenu->setPositionY(playerUsername->getPositionY() - playerUsername->getScaledContentHeight()/2 - profileMenu->getScaledContentHeight()/2 - 1.f);
+
+				// close enough!
+				playerUsername->setPositionY(playerUsername->getPositionY() - 10.f);
+				profileMenu->setPositionY(profileMenu->getPositionY() - 10.f);
+			}
 
 			log::info("mainMenu->getPosition(): {}", mainMenu->getPosition());
 			log::info("bottomMenu->getPosition(): {}", bottomMenu->getPosition());
