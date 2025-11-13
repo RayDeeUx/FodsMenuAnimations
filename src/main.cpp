@@ -146,16 +146,14 @@ class $modify(MyMenuLayer, MenuLayer) {
 		elapsedTime = 0.f;
 		alowRpy = true;
 	}
-	/*
 	static cocos2d::CCScene* scene(bool p0) {
 		CCScene* scene = MenuLayer::scene(p0);
 		if (JASMINE_WHYTHEFUCK_LOADED && JASMINE_WHYTHEFUCK_ENABLED) {
-			FLAlertLayer* alert = FLAlertLayer::create("Uh oh!", "<cy>Another menu animations mod is active! Please consider disabling it through its mod settings.</c>", "I Understand");
+			FLAlertLayer* alert = FLAlertLayer::create("Uh oh!", "<cy>Another menu animations mod is active! The specific menu animations mod you have active right now is notorious for misaligning buttons across multiple aspect ratios. As a precaution, those animations have been stopped. Please consider disabling it through its mod settings.</c>", "I Understand");
 			scene->addChild(alert);
 		}
 		return scene;
 	}
-	*/
 	bool init() {
 		if (!MenuLayer::init()) return false;
 
@@ -235,16 +233,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 				playerUsername->setPositionY(playerUsername->getPositionY() - 10.f);
 				profileMenu->setPositionY(profileMenu->getPositionY() - 10.f);
 			}
-
-			log::info("mainMenu->getPosition(): {}", mainMenu->getPosition());
-			log::info("bottomMenu->getPosition(): {}", bottomMenu->getPosition());
-			log::info("profileMenu->getPosition(): {}", profileMenu->getPosition());
-			log::info("rightSideMenu->getPosition(): {}", rightSideMenu->getPosition());
-			log::info("topRightMenu->getPosition(): {}", topRightMenu->getPosition());
-			log::info("sideMenu->getPosition(): {}", sideMenu->getPosition());
-			log::info("socialMediaMenu->getPosition(): {}", socialMediaMenu->getPosition());
-			log::info("moreGamesMenu->getPosition(): {}", moreGamesMenu->getPosition());
-			log::info("playerUsername->getPosition(): {}", playerUsername->getPosition());
 		}
 
 		if (animMode == "Only on Button" || (playedAlready && (animMode == "Once per Game Launch" || animMode == "Only From Loading Screen"))) return true;
