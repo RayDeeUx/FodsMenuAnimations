@@ -1,4 +1,7 @@
 # HJfod's Menu Animations Reborn Changelog
+## v1.2.3
+- Port to GD 2.2081.
+- Declare an incompatibility with Main Menu Minus as it is beginning to get ridiculously tiresome to keep up with the vibecoded nonsense that keeps getting published lately.
 ## v1.2.2
 - Refactor a few things here and there for slightly more robust compatability. (I hope.)
 ## v1.2.1
