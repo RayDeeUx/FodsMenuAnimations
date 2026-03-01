@@ -1,6 +1,6 @@
 # HJfod's Menu Animations Reborn Changelog
 ## v1.2.4
-- Added a new setting:  `Move Menus Instead Of Moving Individual Buttons`  .
+- Added a new setting:  `Move Menus Instead Of Moving Individual Buttons`  . Enabled by default due to Geode v5's changes.
 - Fix a really obscure oversight.
 ## v1.2.3
 - Port to GD 2.2081.
