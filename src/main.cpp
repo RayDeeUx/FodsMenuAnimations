@@ -280,10 +280,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 		CCNode* moreGamesMenu = this->getChildByID("more-games-menu");
 		CCNode* playerUsername = this->getChildByID("player-username");
 
-		if (bottomMenu && bottomMenu->getLayout()) bottomMenu->updateLayout();
-		if (rightSideMenu && rightSideMenu->getLayout()) rightSideMenu->updateLayout();
-		if (sideMenu && sideMenu->getLayout()) sideMenu->updateLayout();
-
 		if (!mainMenu || !bottomMenu || !profileMenu || !rightSideMenu || !topRightMenu || !sideMenu || !socialMediaMenu || !moreGamesMenu || !playerUsername) return;
 
 		// so here's a funny story about this code segment--
@@ -545,10 +541,6 @@ class $modify(MyMenuLayer, MenuLayer) {
 			}
 		}
 		UPDATE_I
-
-		if (bottomMenu && bottomMenu->getLayout()) bottomMenu->updateLayout();
-		if (rightSideMenu && rightSideMenu->getLayout()) rightSideMenu->updateLayout();
-		if (sideMenu && sideMenu->getLayout()) sideMenu->updateLayout();
 
 		CCNode* redashMenu = REDASH ? this->getChildByID("ninxout.redash/redash-menu") : nullptr;
 		CCNode* redashHide = REDASH ? this->getChildByID("ninxout.redash/hide-button-menu") : nullptr;
