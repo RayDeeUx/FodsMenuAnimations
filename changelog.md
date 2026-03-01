@@ -1,4 +1,7 @@
 # HJfod's Menu Animations Reborn Changelog
+## v1.2.4
+- Added a new setting:  `Move Menus Instead Of Moving Individual Buttons`  .
+- Fix a really obscure oversight.
 ## v1.2.3
 - Port to GD 2.2081.
 - Declare an incompatibility with Main Menu Minus as it is beginning to get ridiculously tiresome to keep up with the vibecoded nonsense that keeps getting published lately.

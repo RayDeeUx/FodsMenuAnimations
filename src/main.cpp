@@ -19,7 +19,7 @@ using namespace geode::prelude;
 
 #define REDASH_ID "ninxout.redash"
 #define YAMM_ID "raydeeux.yetanotherqolmod"
-#define VANILLA_PAGES_ID "alphalaneous.vanilla_pages"
+#define VANILLA_PAGES_ID "raydeeux.vanilla_pages"
 #define JASMINE_WHYTHEFUCK_ID "bluescratch.main_menu_plus"
 #define GET_MOD Loader::get()->getLoadedMod
 #define YAMM Loader::get()->isModLoaded(YAMM_ID)
@@ -51,6 +51,7 @@ using namespace geode::prelude;
 	i = 0;
 
 bool enabled = true;
+bool mmiombs = true;
 bool classic = false;
 bool reverse = false;
 bool rplyBtn = false;
@@ -377,7 +378,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 
 		if (CCNode* theMenuToScaleFromZero = REDASH ? rightSideMenu : bottomMenu) {
-			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu)) {
+			if ((mmiombs) || (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToScaleFromZero == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToScaleFromZero == rightSideMenu))) {
 				const float nodeOrigYPos = theMenuToScaleFromZero->getPositionY();
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 100.f }));
@@ -409,43 +410,63 @@ class $modify(MyMenuLayer, MenuLayer) {
 		}
 		UPDATE_I
 
-		if (auto sideMenuChildren = sideMenu->getChildren(); sideMenuChildren && sideMenu->isVisible()) {
-			if (reverse) sideMenuChildren->reverseObjects();
-			for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
-				if (!node->isVisible()) continue;
-				const float nodeOrigXPos = node->getPositionX();
+		if (sideMenu) {
+			if (mmiombs) {
+				const float nodeOrigXPos = sideMenu->getPositionX();
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
+				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, 100.f }));
 
-				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
-				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 100.f, 0.f }));
+				sideMenu->setPositionX(nodeOrigXPos - 100.f);
+				sideMenu->stopAllActions();
+				sideMenu->runAction(CCSequence::create(delay, eeoMove, nullptr));
+			} else if (auto sideMenuChildren = sideMenu->getChildren(); sideMenuChildren && sideMenu->isVisible()) {
+				if (reverse) sideMenuChildren->reverseObjects();
+				for (CCNode* node : CCArrayExt<CCNode*>(sideMenuChildren)) {
+					if (!node->isVisible()) continue;
+					const float nodeOrigXPos = node->getPositionX();
 
-				node->setPositionX(nodeOrigXPos - 100.f);
-				node->stopAllActions();
-				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 100.f, 0.f }));
 
-				i++;
+					node->setPositionX(nodeOrigXPos - 100.f);
+					node->stopAllActions();
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+
+					i++;
+				}
 			}
 		}
 		UPDATE_I
 
-		if (const auto topRightChildren = topRightMenu->getChildren(); topRightChildren && topRightMenu->isVisible()) {
-			for (CCNode* node : CCArrayExt<CCNode*>(topRightChildren)) {
-				if (!node->isVisible()) continue;
-				const float nodeOrigXPos = node->getPositionY();
-
-				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+		if (topRightMenu) {
+			if (mmiombs) {
+				const float nodeOrigYPos = topRightMenu->getPositionY();
+				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -100.f }));
 
-				node->setPositionY(nodeOrigXPos + 100.f);
-				node->stopAllActions();
-				node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+				topRightMenu->setPositionY(nodeOrigYPos + 100.f);
+				topRightMenu->stopAllActions();
+				topRightMenu->runAction(CCSequence::create(delay, eeoMove, nullptr));
+			} else if (const auto topRightChildren = topRightMenu->getChildren(); topRightChildren && topRightMenu->isVisible()) {
+				for (CCNode* node : CCArrayExt<CCNode*>(topRightChildren)) {
+					if (!node->isVisible()) continue;
+					const float nodeOrigXPos = node->getPositionY();
 
-				i++;
+					CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(((static_cast<float>(i) * .25f) + 2.f)));
+					CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { 0.f, -100.f }));
+
+					node->setPositionY(nodeOrigXPos + 100.f);
+					node->stopAllActions();
+					node->runAction(CCSequence::create(delay, eeoMove, nullptr));
+
+					i++;
+				}
 			}
 		}
 		UPDATE_I
 
 		if (CCNode* theMenuToSlideFromRight = REDASH ? bottomMenu : rightSideMenu) {
-			if (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu)) {
+			if ((mmiombs) || (VANILLA_PAGES_LOADED && (VANILLA_PAGES_MENULAYER_BOTTOM && theMenuToSlideFromRight == bottomMenu || VANILLA_PAGES_MENULAYER_RIGHT && theMenuToSlideFromRight == rightSideMenu))) {
 				const float nodeOrigXPos = theMenuToSlideFromRight->getPositionX();
 				CCDelayTime* delay = CCDelayTime::create(APPLY_ANIM_MODIFIERS(1.f));
 				CCEaseExponentialOut* eeoMove = CCEaseExponentialOut::create(CCMoveBy::create(APPLY_ANIM_EXTENDERS(1.f), { -100.f, 0.f }));
@@ -690,6 +711,7 @@ class $modify(MyMenuLayer, MenuLayer) {
 
 $on_mod(Loaded) {
 	enabled = Mod::get()->getSettingValue<bool>("enabled");
+	mmiombs = Mod::get()->getSettingValue<bool>("move-menus-instead-of-buttons");
 	classic = Mod::get()->getSettingValue<bool>("classic-play-button-anim");
 	queuing = Mod::get()->getSettingValue<bool>("queue-in-main-thread");
 	reverse = Mod::get()->getSettingValue<bool>("reverse-side-menus");
@@ -700,6 +722,9 @@ $on_mod(Loaded) {
 	animMode = Mod::get()->getSettingValue<std::string>("animation-mode");
 	listenForSettingChanges<bool>("enabled", [](bool updatedEnabledSetting) {
 		enabled = updatedEnabledSetting;
+	});
+	listenForSettingChanges<bool>("move-menus-instead-of-buttons", [](bool updatedMMIOMBS) {
+		mmiombs = updatedMMIOMBS;
 	});
 	listenForSettingChanges<std::string>("animation-mode", [](std::string updatedAnimMode) {
 		animMode = updatedAnimMode;

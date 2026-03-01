@@ -1,5 +1,5 @@
 {
-	"geode": "5.0.0-beta.3",
+	"geode": "5.2.0",
 	"gd": {
 		"win": "2.2081",
 		"mac": "2.2081",
@@ -8,7 +8,7 @@
 	},
 	"id": "raydeeux_hjfod.fodsmenuanimations",
 	"name": "HJfod's Menu Animations Reborn",
-	"version": "v1.2.3",
+	"version": "v1.2.4",
 	"developers": ["RayDeeUx", "HJfod"],
 	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
 	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",
@@ -31,6 +31,12 @@
 				"Once per Game Launch",
 				"Only on Button"
 			]
+		},
+		"move-menus-instead-of-buttons": {
+			"name": "Move Menus Instead Of Moving Individual Buttons",
+			"description": "Hopefully a temporary toggle.",
+			"type": "bool",
+			"default": true
 		},
 		"classic-play-button-anim": {
 			"name": "Classic Play Button Animation",
