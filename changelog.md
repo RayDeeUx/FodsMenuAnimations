@@ -1,4 +1,6 @@
 # HJfod's Menu Animations Reborn Changelog
+## v1.2.5
+- Removed Herobrine's attempts to "Reforge-ify" the main menu with a burning dumpster fire's worth of poorly written C++
 ## v1.2.4
 - Added a new setting:  `Move Menus Instead Of Moving Individual Buttons`  . Enabled by default due to Geode v5's changes.
 - Fix a really obscure oversight.

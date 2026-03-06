@@ -8,7 +8,7 @@
 	},
 	"id": "raydeeux_hjfod.fodsmenuanimations",
 	"name": "HJfod's Menu Animations Reborn",
-	"version": "v1.2.4",
+	"version": "v1.2.5",
 	"developers": ["RayDeeUx", "HJfod"],
 	"description": "HJfod's menu animations mod from 2.1, ported to Geode!",
 	"repository": "https://github.com/RayDeeUx/FodsMenuAnimations",
@@ -148,6 +148,54 @@
 		"bluescratch.main_menu_plus": {
 			"version": ">=1.0.0",
 			"breaking": false
+		},
+		"muhammadgames.bettermenu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"muhammadgames.better_menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"muhammadgames.better-menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.bettermenu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.better_menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.better-menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"muhammadgames.reforgedmenu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"muhammadgames.reforged_menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"muhammadgames.reforged-menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.reforgedmenu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.reforged_menu": {
+			"version": ">=1.0.0",
+			"breaking": true
+		},
+		"viper.reforged-menu": {
+			"version": ">=1.0.0",
+			"breaking": true
 		}
 	}
 }
