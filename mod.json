@@ -152,50 +152,6 @@
 		"muhammadgames.bettermenu": {
 			"version": ">=1.0.0",
 			"breaking": true
-		},
-		"muhammadgames.better_menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"muhammadgames.better-menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.bettermenu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.better_menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.better-menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"muhammadgames.reforgedmenu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"muhammadgames.reforged_menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"muhammadgames.reforged-menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.reforgedmenu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.reforged_menu": {
-			"version": ">=1.0.0",
-			"breaking": true
-		},
-		"viper.reforged-menu": {
-			"version": ">=1.0.0",
-			"breaking": true
 		}
 	}
 }
